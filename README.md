@@ -10,8 +10,6 @@
 
 ## 食用步骤
 
-0. 有关虚拟声卡，以VoiceMeeter举例，在VoiceMeeter初始化完成后，不需要在使用本软件的同时运行VoiceMeeter。
-
 1. 打开准备发送语音的聊天窗口，并打开语音输入界面，例如下图。关于窗口名称，举例：该QQ群聊窗口“核实验场”会在软件中显示为“QQ”。
 
    ![说明](https://github.com/user-attachments/assets/6bf3b043-83d6-46e1-8680-268ee03fd013)
