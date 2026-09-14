@@ -1,4 +1,4 @@
-﻿using System.Windows;
+using System.Windows;
 
 namespace AudioToMicWPF
 {
@@ -8,5 +8,4 @@ namespace AudioToMicWPF
     public partial class App : Application
     {
     }
-
 }

@@ -1,20 +1,24 @@
-﻿using NAudio.Wave;
-using AudioToMicWPF.Services;
-using NAudio.Flac;
+using System;
 using System.IO;
+using NAudio.Flac;
+using NAudio.Wave;
 
-public static class AudioDecoderFactory
+namespace AudioToMicWPF.Services
 {
-    public static WaveStream CreateAudioReader(string filePath)
+    public static class AudioDecoderFactory
     {
-        var ext = Path.GetExtension(filePath).ToLowerInvariant();
-        return ext switch
+        public static WaveStream CreateAudioReader(string filePath)
         {
-            ".mp3" => new Mp3FileReader(filePath),
-            ".wav" => new WaveFileReader(filePath),
-            ".flac" => new FlacReader(filePath), // 确保引用了 NAudio.Flac  
-            ".ogg" => new VorbisWaveReader(filePath), // 自定义类，封装 NVorbis  
-            _ => throw new NotSupportedException($"不支持的音频格式: {ext}")
-        };
+            var ext = Path.GetExtension(filePath).ToLowerInvariant();
+            return ext switch
+            {
+                ".mp3" => new Mp3FileReader(filePath),
+                ".wav" => new WaveFileReader(filePath),
+                ".flac" => new FlacReader(filePath),
+                ".ogg" => new VorbisWaveReader(filePath),
+                ".m4a" or ".aac" or ".wma" => new MediaFoundationReader(filePath),
+                _ => new MediaFoundationReader(filePath) // 尝试使用 Windows Media Foundation 解码器
+            };
+        }
     }
 }

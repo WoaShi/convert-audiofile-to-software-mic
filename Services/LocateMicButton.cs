@@ -1,9 +1,9 @@
-﻿using OpenCvSharp;
-using OpenCvSharp.Extensions;
+using System;
 using System.Drawing;
+using System.IO;
 using System.Windows;
 using System.Windows.Forms;
-
+using Point = System.Drawing.Point;
 
 namespace AudioToMicWPF.Services
 {
@@ -18,56 +18,64 @@ namespace AudioToMicWPF.Services
 
         public void MatchAndMoveMouse(string targetImagePath)
         {
-            // 捕获屏幕(此时已推送QQ至焦点)  
-            Rectangle screenBounds = Screen.PrimaryScreen.Bounds;
-            using (Bitmap screenShot = new Bitmap(screenBounds.Width, screenBounds.Height))
+            // 处理相对路径与绝对路径
+            string resolvedPath = targetImagePath;
+            if (!Path.IsPathRooted(resolvedPath))
             {
-                using (Graphics g = Graphics.FromImage(screenShot))
+                resolvedPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, targetImagePath);
+            }
+
+            if (!File.Exists(resolvedPath))
+            {
+                System.Windows.MessageBox.Show($"未找到语音按钮特征图片：{resolvedPath}\n请先点击“截图语音按钮”进行裁截！", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            Bitmap? targetBmp = null;
+            try
+            {
+                // 使用内存流加载，避免占用文件锁
+                byte[] imgBytes = File.ReadAllBytes(resolvedPath);
+                using MemoryStream ms = new MemoryStream(imgBytes);
+                targetBmp = new Bitmap(ms);
+            }
+            catch (Exception ex)
+            {
+                System.Windows.MessageBox.Show($"加载语音按钮图片失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            using (targetBmp)
+            {
+                // 获取主屏幕尺寸 (防 null 保护)
+                Rectangle screenBounds = Screen.PrimaryScreen?.Bounds ?? Screen.AllScreens[0].Bounds;
+
+                using (Bitmap screenShot = new Bitmap(screenBounds.Width, screenBounds.Height))
                 {
-                    g.CopyFromScreen(0, 0, 0, 0, screenShot.Size);
+                    using (Graphics g = Graphics.FromImage(screenShot))
+                    {
+                        g.CopyFromScreen(screenBounds.Left, screenBounds.Top, 0, 0, screenShot.Size);
+                    }
+
+                    // 使用轻量高性能纯 C# 模板匹配
+                    var matchResult = TemplateMatcher.Match(screenShot, targetBmp, _threshold);
+
+                    if (matchResult.Success)
+                    {
+                        // 移动鼠标至匹配位置中心 (考虑多屏幕偏移)
+                        int targetX = screenBounds.Left + matchResult.Center.X;
+                        int targetY = screenBounds.Top + matchResult.Center.Y;
+                        Cursor.Position = new Point(targetX, targetY);
+                    }
+                    else
+                    {
+                        System.Windows.MessageBox.Show(
+                            $"未在屏幕上匹配到语音按钮！(当前最高相似度: {matchResult.Score:P0}，设定阈值: {_threshold:P0})\n" +
+                            "请确认聊天窗口已处于前台且语音面板处于展开状态，或适当降低置信度阈值。",
+                            "匹配提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
                 }
-
-                // Bitmap -> OpenCvSharp Mat  
-                Mat screenMat = BitmapConverter.ToMat(screenShot);
-
-                // 加载目标图片  
-                Mat targetMat = Cv2.ImRead(targetImagePath, ImreadModes.Color);
-                if (targetMat.Empty())
-                {
-                    System.Windows.MessageBox.Show("图片错误！", "Title", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-
-                Cv2.CvtColor(screenMat, screenMat, ColorConversionCodes.BGR2GRAY);
-                Cv2.CvtColor(targetMat, targetMat, ColorConversionCodes.BGR2GRAY);
-
-                // 使用模板匹配  
-                Mat result = new Mat();
-                Cv2.MatchTemplate(screenMat, targetMat, result, TemplateMatchModes.CCoeffNormed);
-
-                // 获取匹配的最大值和位置  
-                Cv2.MinMaxLoc(result, out _, out double maxVal, out _, out OpenCvSharp.Point maxLoc);
-
-                // 设置匹配的阈值  
-                if (maxVal >= _threshold)
-                {
-                    // 计算匹配位置的中心  
-                    System.Drawing.Point matchCenter = new(maxLoc.X + targetMat.Width / 2, maxLoc.Y + targetMat.Height / 2);
-
-                    // 移动鼠标到匹配位置  
-                    Cursor.Position = new System.Drawing.Point(matchCenter.X, matchCenter.Y);
-                    //System.Windows.MessageBox.Show($"找到匹配，鼠标已移动到位置：{matchCenter}");  
-                }
-                else
-                {
-                    //System.Windows.MessageBox.Show("未找到足够匹配的图像。");  
-                }
-
-                // 释放资源  
-                screenMat.Dispose();
-                targetMat.Dispose();
-                result.Dispose();
             }
         }
     }
 }
-

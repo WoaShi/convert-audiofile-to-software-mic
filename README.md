@@ -1,63 +1,72 @@
-# 使用方法
+# convert-audiofile-to-software-mic (音频文件转软件语音)
 
-## 重要说明
+![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square&logo=dotnet)
+![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078D4?style=flat-square&logo=windows)
+![UI](https://img.shields.io/badge/UI-Fluent%20(Mica)-005FB8?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 
-**软件需求**：
+一个轻量、现代化的 Windows 桌面工具，用于将本地各类音频文件转为聊天软件（如 QQ、微信等）的麦克风语音输入。软件通过虚拟音频链路进行音频直通推流，并自动在屏幕上识别匹配语音按钮并模拟按住发送。
 
-    该软件赖虚拟声卡（例如 `VoiceMeeter`）。
+---
 
-**兼容性**：该软件支持如 QQNT 等通过按下语音按钮发送语音的软件。
+## ✨ 核心特性
 
-## 食用步骤
+- 🎨 **原生 Fluent 现代设计**：采用 Windows 11 Fluent 设计规范与 Mica（云母）半透明材质背景，交互与视觉现代精致。
+- 🔗 **虚拟声卡直通链路**：自动探测与管理系统虚拟声卡通道（支持 VB-Audio CABLE、VoiceMeeter 等），支持一键检测输出端与输入端的连接状态。
+- 🎵 **丰富音频格式支持**：内置多解码管线，全面支持 `MP3`、`WAV`、`FLAC`、`OGG (Vorbis)`、`M4A`、`AAC` 等常见格式。
+- ⚡ **高性能纯 C# 模板匹配**：采用基于 2D 积分图的高性能归一化互相关（NCC）图像匹配算法，**0 原生 C++/OpenCV 依赖**，运行轻快低内存。
+- ✂️ **交互式 Fluent 截图工具**：内置框选截图工具，支持拖拽框选、即时重选、ESC 退出与特征预览，轻松录入语音按钮样本。
 
-1. 打开准备发送语音的聊天窗口，并打开语音输入界面，例如下图。关于窗口名称，举例：该QQ群聊窗口“核实验场”会在软件中显示为“QQ”。
+---
 
-   ![说明](https://github.com/user-attachments/assets/6bf3b043-83d6-46e1-8680-268ee03fd013)
-  
-3. 打开软件本体。
-  
-4. 点击 `选择音频文件` 按钮，在电脑中选择想要转录的音频。
-  
-   ![a18c4333-3249-4e5d-97b1-f4e755e946ae](https://github.com/user-attachments/assets/7abb1533-430b-471a-99d1-c1778f589456)
+## 🛠️ 准备工作
 
-  * 图中顶上两个框可以进行交互，选取成功后，同色框中会显示对应路径。
-5. 点击 `选择聊天窗口` 按钮，打开选择QQ聊天窗口界面：
+软件依赖虚拟音频驱动（将电脑播放的声音重定向为麦克风输入信号）：
 
-   ![bf7ff5ec-5659-495a-8572-04c2191f2ea9](https://github.com/user-attachments/assets/d0dc655d-e2bc-4635-9e82-8126c5164f7d)
+1. **安装虚拟音频驱动（推荐 VB-CABLE）**：
+   - 首次启动软件时，若未检测到驱动，可在主界面点击 **【安装驱动】** 前往官方网站免费下载安装（通过微软 WHQL 官方认证，无需重启系统）。
+2. **配置聊天软件麦克风**：
+   - 打开聊天软件（如 QQ、微信）的“设置 -> 音视频通话 / 声音”。
+   - 将聊天软件的 **麦克风输入设备** 修改为虚拟声卡对应的录音端（例如 `CABLE Output` 或 `VoiceMeeter Output`）。
 
-  * 选择与刚才聊天窗口名称相匹配的窗口（如图中的 “QQ”），点击确认。
+---
 
-  * **注**：若"QQ"未出现在列表中，请点开聊天窗口使其出现在屏幕中，然后点击 `刷新`，再次在列表中寻找"QQ"。
+## 🚀 使用步骤
 
-6. 若选择成功，右侧方框将显示窗口名称。
-  
-7. 点击 `选择虚拟声卡` 栏目选取你的虚拟声卡输入，确保其与虚拟声卡输出相匹配，例如 VoiceMeeter VAIO3 Input 对应的麦克风输入应设置为 VoiceMeeter VAIO3 Output。
+1. **绑定聊天窗口**：
+   - 打开准备发送语音的聊天对话框，展开“按住说话 / 发送语音”界面。
+   - 在本软件中点击 **【选择软件窗口】**，在列表中选中目标聊天窗口并确认。
+2. **采样语音按钮**：
+   - 点击 **【截图语音按钮】**，在屏幕上拖拽框选聊天窗口中的语音按钮并点击保存。
+   - 样本将自动保存并即时生效，后续若按钮外观未发生变化无需重复截图。
+3. **选择待发送音频**：
+   - 点击 **【选择音频文件】**，选中要发送的音频文件。
+4. **一键播放与发送**：
+   - 点击 **【播放到软件语音】**。
+   - 软件将自动将目标聊天窗口激活至前台、精准定位语音按钮并在播放期间持续模拟按住，音频播放完毕后自动释放完成发送。
 
-   ![未标题-2](https://github.com/user-attachments/assets/649c6b71-0061-4873-9808-bb4d91201af4)
+---
 
-8. 点击 `截图语音按钮`，对语音按钮进行裁截，如图。
-  
-  ![5c644045-93eb-4f73-a9b4-addb09fdbb22](https://github.com/user-attachments/assets/c8c1fbb5-4053-41c9-a418-ec995f0f40bf)
+## 💡 常见问题与提示
 
-  * 第一次左键单击之后会进行一个标记，作为截图框的左上或右下角（取决于第二个点位置），再次单击确定一个框，若希望临时取消可以右键鼠标
-  
-9. 若报错“图片错误！”，可自行将语音按钮截图保存到软件同目录的 `Images` 文件夹下，并重命名为 `MicButton.png`。
-  
-10. 正常来说，到这一步，你已经完成了所有步骤，点击 `播放到软件语音`即可开始转录。
-  
-  * **注意**：由于QQNT的问题，若你在选择好虚拟声卡后点击 `播放到语音软件`，发现QQ的语音没有声音，建议将虚拟声卡的输出质量在`44100Hz`/`48000Hz`/`8000Hz`间变动。
-  * **注意**：请自行在Windows设置QQ输入麦克风为虚拟声卡的Output端，如图。
-    ![说明](https://github.com/user-attachments/assets/ec894435-003d-4b62-bcec-ec295b348f14)
-  * **注意**：若点击`播放到语音软件`后，若鼠标锁定在了其他圆形元素上，可以适当对图像识别置信度进行调节。
+* **聊天软件接收到的语音无声或有电流杂音？**
+  * 请在 Windows 系统声音设置中，将虚拟声卡输入端与输出端的格式统一配置为 `48000Hz (DVD 音质)` 或 `44100Hz (CD 音质)` 16-bit / 24-bit。
+* **屏幕未找到语音按钮？**
+  * 请确保目标聊天窗口已展开语音输入面板，且未被其他不透明窗口遮挡；
+  * 可适当降低界面中的“图像识别置信度”滑块（推荐 60% ~ 75% 之间）；
+  * 如聊天软件更新了界面主题或切换了高分屏缩放比例，建议点击【截图语音按钮】重新截取一次。
 
-## 鸣谢
+---
 
-FluentUI库：[GitHub - iNKORE-NET/UI.WPF.Modern: Modern (Fluent 2) styles and controls for your WPF applications](https://github.com/iNKORE-NET/UI.WPF.Modern)
+## 📦 技术栈与依赖
 
-音频工具：[GitHub - naudio/NAudio: Audio and MIDI library for .NET](https://github.com/naudio/NAudio)
-         [GitHub - BunLabs/NAudio.Flac: A FLAC library for NAudio ≥ 2.0](https://github.com/BunLabs/NAudio.Flac)
-         [GitHub - NVorbis is a .Net library for decoding Xiph.org Vorbis files.](https://github.com/NVorbis/NVorbis)
+- **运行时环境**：.NET 10.0 (`net10.0-windows`)
+- **界面与主题**：WPF / [iNKORE.UI.WPF.Modern](https://github.com/iNKORE-NET/UI.WPF.Modern)
+- **音频流处理**：[NAudio](https://github.com/naudio/NAudio) / [BunLabs.NAudio.Flac](https://github.com/BunLabs/NAudio.Flac) / [NVorbis](https://github.com/NVorbis/NVorbis)
 
-图像识别：OpenCvSharp
+---
 
-十分感谢 ETO-QSH 对该软件的建议与修正。
+## 📄 开源许可证
+
+本项目基于 [MIT License](LICENSE) 协议开源。
+特别感谢 ETO-QSH 及开源社区各位贡献者的建议与支持。

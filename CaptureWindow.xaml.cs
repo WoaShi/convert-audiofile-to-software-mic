@@ -1,6 +1,4 @@
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -33,9 +31,17 @@ namespace AudioToMicWPF
             Width = SystemParameters.VirtualScreenWidth;
             Height = SystemParameters.VirtualScreenHeight;
 
-            // 确保按钮初始化完成
             ButtonPanel.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
             ButtonPanel.Arrange(new Rect(0, 0, ButtonPanel.DesiredSize.Width, ButtonPanel.DesiredSize.Height));
+        }
+
+        protected override void OnPreviewKeyDown(KeyEventArgs e)
+        {
+            base.OnPreviewKeyDown(e);
+            if (e.Key == Key.Escape)
+            {
+                CancelSelection();
+            }
         }
 
         private void CanvasRoot_PreviewMouseDown(object sender, MouseButtonEventArgs e)
@@ -48,13 +54,12 @@ namespace AudioToMicWPF
 
                 if (!_firstPoint.HasValue)
                 {
-                    // 第一次点击：设置起点
                     _firstPoint = clickPoint;
                     SelectionRect.Visibility = Visibility.Visible;
+                    UpdateSelectionRect(clickPoint, clickPoint);
                 }
                 else
                 {
-                    // 第二次点击：锁定选区
                     _currentPoint = clickPoint;
                     FinalizeSelection();
                     ShowConfirmationButtons();
@@ -80,10 +85,19 @@ namespace AudioToMicWPF
 
         private void CanvasRoot_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
-            // 仅处理第二次点击后的状态
-            if (_firstPoint.HasValue && _currentPoint.HasValue)
+            if (_isFinalized) return;
+
+            if (_firstPoint.HasValue && !_currentPoint.HasValue)
             {
-                FinalizeSelection();
+                var currentPos = e.GetPosition(this);
+                if (Math.Abs(currentPos.X - _firstPoint.Value.X) > 8 &&
+                    Math.Abs(currentPos.Y - _firstPoint.Value.Y) > 8)
+                {
+                    _currentPoint = currentPos;
+                    FinalizeSelection();
+                    ShowConfirmationButtons();
+                    _isFinalized = true;
+                }
             }
         }
 
@@ -93,8 +107,8 @@ namespace AudioToMicWPF
 
             Canvas.SetLeft(SelectionRect, x1);
             Canvas.SetTop(SelectionRect, y1);
-            SelectionRect.Width = x2 - x1;
-            SelectionRect.Height = y2 - y1;
+            SelectionRect.Width = Math.Max(1, x2 - x1);
+            SelectionRect.Height = Math.Max(1, y2 - y1);
         }
 
         private (double x1, double y1, double x2, double y2) NormalizePoints(Point p1, Point p2)
@@ -109,22 +123,37 @@ namespace AudioToMicWPF
 
         private void ShowConfirmationButtons()
         {
-            // 计算按钮位置
+            if (!_firstPoint.HasValue || !_currentPoint.HasValue) return;
+
             var (_, _, x2, y2) = NormalizePoints(_firstPoint.Value, _currentPoint.Value);
 
-            // 确保按钮在屏幕内
-            double maxX = SystemParameters.VirtualScreenWidth - ButtonPanel.ActualWidth - 10;
-            double maxY = SystemParameters.VirtualScreenHeight - ButtonPanel.ActualHeight - 10;
+            ButtonPanel.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
+            double panelW = ButtonPanel.DesiredSize.Width > 0 ? ButtonPanel.DesiredSize.Width : 220;
+            double panelH = ButtonPanel.DesiredSize.Height > 0 ? ButtonPanel.DesiredSize.Height : 50;
 
-            Canvas.SetLeft(ButtonPanel, Math.Min(x2, maxX));
-            Canvas.SetTop(ButtonPanel, Math.Min(y2 + 10, maxY));
+            double targetX = x2 - panelW;
+            if (targetX < 12) targetX = 12;
+            double maxX = ActualWidth - panelW - 12;
+            if (targetX > maxX) targetX = maxX;
+
+            double targetY = y2 + 10;
+            if (targetY + panelH > ActualHeight - 12)
+            {
+                targetY = y2 - panelH - 10;
+            }
+            if (targetY < 12) targetY = 12;
+
+            Canvas.SetLeft(ButtonPanel, targetX);
+            Canvas.SetTop(ButtonPanel, targetY);
 
             ButtonPanel.Visibility = Visibility.Visible;
-            Panel.SetZIndex(ButtonPanel, 9999); // 确保按钮在最上层
+            Panel.SetZIndex(ButtonPanel, 9999);
         }
 
         private void FinalizeSelection()
         {
+            if (!_firstPoint.HasValue || !_currentPoint.HasValue) return;
+
             var start = PointToScreen(_firstPoint.Value);
             var end = PointToScreen(_currentPoint.Value);
 
@@ -146,52 +175,31 @@ namespace AudioToMicWPF
             ButtonPanel.Visibility = Visibility.Collapsed;
         }
 
+        private void ResetButton_Click(object sender, RoutedEventArgs e)
+        {
+            ResetSelection();
+        }
+
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                if (_capturedRect.HasValue && _capturedRect.Value.Width > 5 && _capturedRect.Value.Height > 5)
-                {
-                    var imagesDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images");
-                    Directory.CreateDirectory(imagesDir);
-
-                    using (var bmp = new Bitmap(_capturedRect.Value.Width, _capturedRect.Value.Height))
-                    using (var g = Graphics.FromImage(bmp))
-                    {
-                        g.CopyFromScreen(
-                            new System.Drawing.Point(_capturedRect.Value.X, _capturedRect.Value.Y),
-                            System.Drawing.Point.Empty,
-                            bmp.Size
-                        );
-                        bmp.Save(Path.Combine(imagesDir, "MicButton.png"), ImageFormat.Png);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"保存失败: {ex.Message}");
-            }
+            DialogResult = true;
             Close();
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            // 重置所有状态
-            _firstPoint = null;
-            _currentPoint = null;
-            _capturedRect = null;
-            _isFinalized = false;
+            CancelSelection();
+        }
 
-            // 清除界面元素
-            SelectionRect.Visibility = Visibility.Collapsed;
-            ButtonPanel.Visibility = Visibility.Collapsed;
-
+        private void CancelSelection()
+        {
+            ResetSelection();
+            DialogResult = false;
             Close();
         }
 
         protected override void OnClosed(EventArgs e)
         {
-            // 最终状态清理
             if (!_isFinalized)
             {
                 _capturedRect = null;
