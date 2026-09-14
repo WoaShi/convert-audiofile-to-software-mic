@@ -50,7 +50,7 @@
 
 ## 鸣谢与依赖
 
-- 界面组件：[iNKORE.UI.WPF.Modern](https://github.com/iNKORE-NET/UI.WPF.Modern)
+- 界面框架：.NET 10 WPF 原生 Fluent UI & Windows 11 Mica 材质
 - 音频处理：[NAudio](https://github.com/naudio/NAudio) / [BunLabs.NAudio.Flac](https://github.com/BunLabs/NAudio.Flac) / [NVorbis](https://github.com/NVorbis/NVorbis)
 - 特别感谢 ETO-QSH 对该软件的建议与修正。
 

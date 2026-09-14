@@ -3,16 +3,18 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using AudioToMicWPF.Services;
-using iNKORE.UI.WPF.Modern.Controls;
 using Brushes = System.Windows.Media.Brushes;
 using Color = System.Windows.Media.Color;
 using Image = System.Windows.Controls.Image;
+using Point = System.Drawing.Point;
 
 namespace AudioToMicWPF
 {
@@ -85,6 +87,20 @@ namespace AudioToMicWPF
 
     public partial class MainWindow : Window
     {
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
+
+        private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
+        private const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
+
+        public enum DialogButtonResult
+        {
+            Primary,
+            Close
+        }
+
+        private TaskCompletionSource<DialogButtonResult>? _dialogTcs;
+
         public MainViewModel viewModel = new MainViewModel();
         private readonly FindDevicesServices findDevicesServices;
 
@@ -94,6 +110,76 @@ namespace AudioToMicWPF
             DataContext = viewModel;
             findDevicesServices = new FindDevicesServices();
             RefreshDriverState();
+        }
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            TryApplyMica();
+        }
+
+        private void TryApplyMica()
+        {
+            try
+            {
+                var hwnd = new WindowInteropHelper(this).Handle;
+                if (Environment.OSVersion.Version.Major >= 10 && Environment.OSVersion.Version.Build >= 22000)
+                {
+                    int backdropType = 2; // DWMSBT_MAINWINDOW (Mica)
+                    int hr = DwmSetWindowAttribute(hwnd, DWMWA_SYSTEMBACKDROP_TYPE, ref backdropType, sizeof(int));
+                    if (hr == 0)
+                    {
+                        Background = Brushes.Transparent;
+                    }
+                }
+            }
+            catch
+            {
+                // 系统不支持或异常时保持默认背景色
+            }
+        }
+
+        public Task<DialogButtonResult> ShowDialogAsync(string title, object content, string? primaryText = null, string? closeText = "确定")
+        {
+            DialogTitle.Text = title;
+            DialogContent.Content = content;
+
+            if (string.IsNullOrEmpty(primaryText))
+            {
+                DialogPrimaryBtn.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                DialogPrimaryBtn.Content = primaryText;
+                DialogPrimaryBtn.Visibility = Visibility.Visible;
+            }
+
+            if (string.IsNullOrEmpty(closeText))
+            {
+                DialogCloseBtn.Visibility = Visibility.Collapsed;
+            }
+            else
+            {
+                DialogCloseBtn.Content = closeText;
+                DialogCloseBtn.Visibility = Visibility.Visible;
+            }
+
+            DialogHost.Visibility = Visibility.Visible;
+
+            _dialogTcs = new TaskCompletionSource<DialogButtonResult>();
+            return _dialogTcs.Task;
+        }
+
+        private void OnDialogPrimary_Click(object sender, RoutedEventArgs e)
+        {
+            DialogHost.Visibility = Visibility.Collapsed;
+            _dialogTcs?.TrySetResult(DialogButtonResult.Primary);
+        }
+
+        private void OnDialogClose_Click(object sender, RoutedEventArgs e)
+        {
+            DialogHost.Visibility = Visibility.Collapsed;
+            _dialogTcs?.TrySetResult(DialogButtonResult.Close);
         }
 
         private void RefreshDriverState()
@@ -138,9 +224,10 @@ namespace AudioToMicWPF
                     HorizontalAlignment = HorizontalAlignment.Center,
                     Margin = new Thickness(0, 6, 0, 6)
                 };
-                arrowStack.Children.Add(new FontIcon
+                arrowStack.Children.Add(new TextBlock
                 {
-                    Glyph = "\uE74B",
+                    FontFamily = new System.Windows.Media.FontFamily("Segoe Fluent Icons, Segoe MDL2 Assets"),
+                    Text = "\uE74B",
                     FontSize = 14,
                     Foreground = Brushes.Gray
                 });
@@ -152,15 +239,7 @@ namespace AudioToMicWPF
                     virtualPipelineInfo.InputDeviceName,
                     "\uE720"));
 
-                var dialog = new ContentDialog
-                {
-                    Title = "链路",
-                    Content = panel,
-                    PrimaryButtonText = "确定",
-                    DefaultButton = ContentDialogButton.Primary
-                };
-
-                await dialog.ShowAsync();
+                await ShowDialogAsync("链路", panel, null, "确定");
             }
             else
             {
@@ -173,17 +252,8 @@ namespace AudioToMicWPF
                     Margin = new Thickness(0, 4, 0, 10)
                 });
 
-                var dialog = new ContentDialog
-                {
-                    Title = "链路",
-                    Content = panel,
-                    PrimaryButtonText = "下载驱动",
-                    CloseButtonText = "取消",
-                    DefaultButton = ContentDialogButton.Primary
-                };
-
-                var result = await dialog.ShowAsync();
-                if (result == ContentDialogResult.Primary)
+                var result = await ShowDialogAsync("链路", panel, "下载驱动", "取消");
+                if (result == DialogButtonResult.Primary)
                 {
                     VirtualAudioDriverService.OpenDriverDownloadPage();
                 }
@@ -204,9 +274,10 @@ namespace AudioToMicWPF
             var stack = new StackPanel();
 
             var headerStack = new StackPanel { Orientation = Orientation.Horizontal };
-            headerStack.Children.Add(new FontIcon
+            headerStack.Children.Add(new TextBlock
             {
-                Glyph = iconGlyph,
+                FontFamily = new System.Windows.Media.FontFamily("Segoe Fluent Icons, Segoe MDL2 Assets"),
+                Text = iconGlyph,
                 FontSize = 13,
                 Foreground = Brushes.DodgerBlue,
                 Margin = new Thickness(0, 0, 6, 0),
@@ -243,29 +314,15 @@ namespace AudioToMicWPF
         {
             if (string.IsNullOrEmpty(viewModel.SelectedFilePath) || !File.Exists(viewModel.SelectedFilePath))
             {
-                var dialog = new ContentDialog
-                {
-                    Title = "提示",
-                    Content = "尚未选择音频文件，请先点击【选择音频文件】进行选择！",
-                    CloseButtonText = "确定",
-                    DefaultButton = ContentDialogButton.Close
-                };
-                await dialog.ShowAsync();
+                await ShowDialogAsync("提示", "尚未选择音频文件，请先点击【选择音频文件】进行选择！", null, "确定");
                 return;
             }
 
             var pipeline = VirtualAudioDriverService.DetectPipeline();
             if (!pipeline.IsInstalled || pipeline.OutputDeviceID < 0)
             {
-                var dialog = new ContentDialog
-                {
-                    Title = "声卡未就绪",
-                    Content = "未检测到虚拟声卡设备，请先点击【安装驱动】完成声卡驱动配置！",
-                    PrimaryButtonText = "前往安装驱动",
-                    CloseButtonText = "取消",
-                    DefaultButton = ContentDialogButton.Primary
-                };
-                if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+                var result = await ShowDialogAsync("声卡未就绪", "未检测到虚拟声卡设备，请先点击【安装驱动】完成声卡驱动配置！", "前往安装驱动", "取消");
+                if (result == DialogButtonResult.Primary)
                 {
                     VirtualAudioDriverService.OpenDriverDownloadPage();
                 }
@@ -274,14 +331,7 @@ namespace AudioToMicWPF
 
             if (ListAllWindows.chatProcess == null || ListAllWindows.chatProcess.HasExited || ListAllWindows.chatProcess.MainWindowHandle == IntPtr.Zero)
             {
-                var dialog = new ContentDialog
-                {
-                    Title = "提示",
-                    Content = "请先点击【选择软件窗口】绑定目标聊天软件窗口！",
-                    CloseButtonText = "确定",
-                    DefaultButton = ContentDialogButton.Close
-                };
-                await dialog.ShowAsync();
+                await ShowDialogAsync("提示", "请先点击【选择软件窗口】绑定目标聊天软件窗口！", null, "确定");
                 return;
             }
 
@@ -296,14 +346,7 @@ namespace AudioToMicWPF
             }
             catch (Exception ex)
             {
-                var dialog = new ContentDialog
-                {
-                    Title = "播放出错",
-                    Content = $"播放音频时发生错误：\n{ex.Message}",
-                    CloseButtonText = "确定",
-                    DefaultButton = ContentDialogButton.Close
-                };
-                await dialog.ShowAsync();
+                await ShowDialogAsync("播放出错", $"播放音频时发生错误：\n{ex.Message}", null, "确定");
             }
         }
 
@@ -392,15 +435,7 @@ namespace AudioToMicWPF
                     previewBorder.Child = previewGrid;
                     panel.Children.Add(previewBorder);
 
-                    var dialog = new ContentDialog
-                    {
-                        Title = "截图",
-                        Content = panel,
-                        PrimaryButtonText = "确定",
-                        DefaultButton = ContentDialogButton.Primary
-                    };
-
-                    await dialog.ShowAsync();
+                    await ShowDialogAsync("截图", panel, null, "确定");
                 }
             }
         }

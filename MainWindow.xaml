@@ -4,186 +4,228 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:AudioToMicWPF"
-        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-        ui:WindowHelper.UseModernWindowStyle="True"
-        ui:WindowHelper.SystemBackdropType="Mica"
         mc:Ignorable="d"
         Icon="Images\Wave.png"
         Title="音频文件转软件语音" 
         Height="750" Width="500"
         MinHeight="750" MinWidth="500"
         MaxHeight="750" MaxWidth="500"
+        Background="#F3F3F3"
         WindowStartupLocation="CenterScreen">
 
-    <Grid Margin="0,0,0,78">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="150"/>
-            <RowDefinition/>
-            <RowDefinition Height="Auto"/>
-        </Grid.RowDefinitions>
-
-        <!-- 顶部LOGO区域 -->
-        <Grid Grid.Row="0" Margin="0,10,0,87">
-            <Image Source="/Images/banner.jpg" Margin="0,-26,0,-68">
-                <Image.OpacityMask>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                        <GradientStop Offset="0" Color="#FF000000"/>
-                        <!-- 顶部完全不透明 -->
-                        <GradientStop Offset="1" Color="#00000000"/>
-                        <!-- 底部完全透明 -->
-                    </LinearGradientBrush>
-                </Image.OpacityMask>
-            </Image>
-        </Grid>
-
-        <Grid Height="132" VerticalAlignment="Top" Margin="10,36,358,0" Grid.RowSpan="2">
-            <Button x:Name="FilePickerButton" Opacity="1" Height="130" Width="130" Click="OnPickFile" VerticalAlignment="Top">
-                <Button.Content>
-                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image AutomationProperties.Name="Slice" Source="/Images/audio.png" Width="80" Height="80"/>
-                        <TextBlock Text="选择音频文件" FontSize="14" HorizontalAlignment="Center"/>
-                    </StackPanel>
-                </Button.Content>
-            </Button>
-        </Grid>
-
-        <Grid Height="132" VerticalAlignment="Top" Opacity="1" Margin="153,36,217,0" Grid.RowSpan="2">
-            <Button Height="130" Width="130" Click="GetQQWindow" VerticalAlignment="Top">
-                <Button.Content>
-                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
-                        <Image AutomationProperties.Name="Slice" Source="/Images/window.png" Width="80" Height="80"/>
-                        <TextBlock Text="选择软件窗口" FontSize="14" HorizontalAlignment="Center"/>
-                    </StackPanel>
-                </Button.Content>
-            </Button>
-        </Grid>
-
-        <!-- 主内容区域 -->
-        <Grid Grid.Row="1" Margin="10,45,10,-75" Grid.RowSpan="2">
+    <Grid>
+        <!-- 主界面内容 -->
+        <Grid Margin="0,0,0,78">
             <Grid.RowDefinitions>
+                <RowDefinition Height="150"/>
+                <RowDefinition/>
                 <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*" MinHeight="70"/>
             </Grid.RowDefinitions>
 
-            <!-- 卡片卡片喵 -->
-            <ikw:SimpleStackPanel Spacing="4" Height="360">
-            
-                <!-- 音频文件选择 -->
-                <ui:SettingsCard Click="OnPickFile" Header="音频文件选择" Description="点击选择将要使用的音频文件" Margin="0,1,0,13" VerticalAlignment="Stretch" Height="108">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Glyph="&#xE8D6;" />
-                        <!-- 文件夹图标 -->
-                    </ui:SettingsCard.HeaderIcon>
-
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
-                        <TextBox x:Name="pathShower"
-                                 Height="72"
-                                 Margin="12,0,0,0"
-                                 FontFamily="Consolas"
-                                 ui:ControlHelper.Header="音频路径"
-                                 ui:ControlHelper.PlaceholderText="{Binding SelectedFilePath}"
-                                 AcceptsReturn="True"
-                                 IsUndoEnabled="True"
-                                 IsReadOnly="True"
-                                 IsTabStop="False"
-                                 IsReadOnlyCaretVisible="False"
-                                 IsInactiveSelectionHighlightEnabled="False"
-                                 HorizontalScrollBarVisibility="Auto"
-                                 VerticalScrollBarVisibility="Auto"
-                                 SelectionOpacity="0.4"
-                                 SpellCheck.IsEnabled="False"
-                                 Foreground="#FFD3D3D3"
-                                 Padding="5"
-                                 Width="255"
-                                 TextWrapping="Wrap"
-                                 VerticalAlignment="Center"/>
-                    </StackPanel>
-                </ui:SettingsCard>
-
-                <!-- QQ窗口选择 -->
-                <ui:SettingsCard Click="GetQQWindow" Header="程序窗口选择" Description="点击选择目标软件聊天窗口进行绑定" Margin="0,1,0,13" VerticalAlignment="Stretch" Height="108">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Glyph="&#xF7ED;"/>
-                        <!-- 应用窗口图标 -->
-                    </ui:SettingsCard.HeaderIcon>
-
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Top">
-                        <TextBox x:Name="proccessName"
-                                 Height="72"
-                                 Margin="12,0,0,0"
-                                 FontFamily="Consolas"
-                                 ui:ControlHelper.Header="程序窗口"
-                                 ui:ControlHelper.PlaceholderText="{Binding ProgramName}"
-                                 AcceptsReturn="True"
-                                 IsUndoEnabled="True"
-                                 IsReadOnly="True"
-                                 IsTabStop="False"
-                                 IsReadOnlyCaretVisible="False"
-                                 IsInactiveSelectionHighlightEnabled="False"
-                                 HorizontalScrollBarVisibility="Auto"
-                                 VerticalScrollBarVisibility="Auto"
-                                 SelectionOpacity="0.4"
-                                 SpellCheck.IsEnabled="False"
-                                 Foreground="#FFD3D3D3"
-                                 Padding="5"
-                                 Width="255"
-                                 TextWrapping="Wrap"
-                                 VerticalAlignment="Center"/>
-                    </StackPanel>
-                </ui:SettingsCard>
-
-                <!-- 虚拟声卡设置 -->
-                <ui:SettingsCard x:Name="settingsCard" Header="虚拟声卡设置" Description="{Binding DriverStatusDescription}" Margin="0,1,0,13" VerticalAlignment="Stretch" Height="108">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Glyph="&#xEC72;"/>
-                    </ui:SettingsCard.HeaderIcon>
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="12,0,0,0">
-                        <Button Width="80" Height="36" Margin="0,0,6,0" Content="{Binding DriverActionButtonText}" Click="OnDriverActionButton_Click"/>
-                        <Button Width="130" Height="36" Margin="0,0,6,0" ToolTip="查看链路" Click="OnViewPipeline_Click">
-                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <ui:FontIcon Glyph="&#xE946;" FontSize="14" Margin="0,0,6,0"/>
-                                <TextBlock Text="查看音频链路" VerticalAlignment="Center" FontSize="12"/>
-                            </StackPanel>
-                        </Button>
-                        <Button ToolTip="刷新状态" Padding="6" Height="36" Width="36" Click="OnRefreshDevices">
-                            <ui:FontIcon Glyph="&#xE72C;" FontSize="13"/>
-                        </Button>
-                    </StackPanel>
-                </ui:SettingsCard>
-
-            </ikw:SimpleStackPanel>
-
-            <!-- 按钮图像置信度调整 -->
-            <Grid Grid.Row="3" Margin="0,30,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="Auto"/>
-                </Grid.ColumnDefinitions>
-
-                <TextBlock Text="图像识别置信度" VerticalAlignment="Center" Margin="10,0"/>
-                <Slider x:Name="thresholdSlider" Grid.Column="1" Orientation="Horizontal" Minimum="0.05" Maximum="1.00" Value="0.70" AutoToolTipPlacement="None"
-                    TickFrequency="0.05" TickPlacement="BottomRight" IsSnapToTickEnabled="True" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0" Width="255"/>
-                <TextBox x:Name="thresholdNumber" Grid.Column="2" Text="{Binding Value, ElementName=thresholdSlider, Mode=TwoWay, StringFormat={}{0:P0}}"
-                    Width="60" Margin="10,0" HorizontalAlignment="Left" TextAlignment="Center" IsReadOnly="True"/>
+            <!-- 顶部LOGO区域 -->
+            <Grid Grid.Row="0" Margin="0,10,0,87">
+                <Image Source="/Images/banner.jpg" Margin="0,-26,0,-68">
+                    <Image.OpacityMask>
+                        <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                            <GradientStop Offset="0" Color="#FF000000"/>
+                            <!-- 顶部完全不透明 -->
+                            <GradientStop Offset="1" Color="#00000000"/>
+                            <!-- 底部完全透明 -->
+                        </LinearGradientBrush>
+                    </Image.OpacityMask>
+                </Image>
             </Grid>
 
-            <!-- 截图按钮 -->
-            <Button Grid.Row="5" Content="截图语音按钮" Click="OnCaptureScreen" 
-                    HorizontalAlignment="Left" VerticalAlignment="Bottom" 
-                    Style="{DynamicResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}"
-                    Width="210" Height="42" Margin="20,0,0,21"/>
+            <Grid Height="132" VerticalAlignment="Top" Margin="10,36,358,0" Grid.RowSpan="2">
+                <Button x:Name="FilePickerButton" Opacity="1" Height="130" Width="130" Click="OnPickFile" VerticalAlignment="Top">
+                    <Button.Content>
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Image AutomationProperties.Name="Slice" Source="/Images/audio.png" Width="80" Height="80"/>
+                            <TextBlock Text="选择音频文件" FontSize="14" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
+            </Grid>
 
-            <!-- 播放按钮 -->
-            <Button Grid.Row="5" Content="播放到软件语音" Click="OnPlayAudio"
-                    HorizontalAlignment="Right" VerticalAlignment="Bottom" 
-                    Style="{DynamicResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}"
-                    Width="210" Height="42" Margin="0,0,20,21" Background="#FF5F5F5F" Foreground="#FFFFFDFA"/>
+            <Grid Height="132" VerticalAlignment="Top" Opacity="1" Margin="153,36,217,0" Grid.RowSpan="2">
+                <Button Height="130" Width="130" Click="GetQQWindow" VerticalAlignment="Top">
+                    <Button.Content>
+                        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Image AutomationProperties.Name="Slice" Source="/Images/window.png" Width="80" Height="80"/>
+                            <TextBlock Text="选择软件窗口" FontSize="14" HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </Button.Content>
+                </Button>
+            </Grid>
+
+            <!-- 主内容区域 -->
+            <Grid Grid.Row="1" Margin="10,45,10,-75" Grid.RowSpan="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*" MinHeight="70"/>
+                </Grid.RowDefinitions>
+
+                <!-- 设置卡片组 -->
+                <StackPanel Height="360">
+                
+                    <!-- 音频文件选择卡片 -->
+                    <Border Background="#FBFBFB" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,1,0,13" Height="108">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xE8D6;" FontSize="20" Foreground="#005FB8" VerticalAlignment="Center" Margin="2,0,10,0"/>
+
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0" Cursor="Hand" MouseLeftButtonUp="OnPickFile">
+                                <TextBlock Text="音频文件选择" FontSize="13" FontWeight="SemiBold" Foreground="#1A1A1A"/>
+                                <TextBlock Text="点击选择将要使用的音频文件" FontSize="11" Foreground="#666666" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+
+                            <TextBox Grid.Column="2"
+                                     x:Name="pathShower"
+                                     Height="72"
+                                     Width="240"
+                                     FontFamily="Consolas"
+                                     FontSize="11"
+                                     Text="{Binding SelectedFilePath, Mode=OneWay}"
+                                     AcceptsReturn="True"
+                                     IsReadOnly="True"
+                                     IsTabStop="False"
+                                     VerticalScrollBarVisibility="Auto"
+                                     HorizontalScrollBarVisibility="Disabled"
+                                     Padding="6"
+                                     TextWrapping="Wrap"
+                                     VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- 目标窗口选择卡片 -->
+                    <Border Background="#FBFBFB" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,1,0,13" Height="108">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xF7ED;" FontSize="20" Foreground="#005FB8" VerticalAlignment="Center" Margin="2,0,10,0"/>
+
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0" Cursor="Hand" MouseLeftButtonUp="GetQQWindow">
+                                <TextBlock Text="程序窗口选择" FontSize="13" FontWeight="SemiBold" Foreground="#1A1A1A"/>
+                                <TextBlock Text="点击选择目标软件聊天窗口进行绑定" FontSize="11" Foreground="#666666" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+
+                            <TextBox Grid.Column="2"
+                                     x:Name="proccessName"
+                                     Height="72"
+                                     Width="240"
+                                     FontFamily="Consolas"
+                                     FontSize="11"
+                                     Text="{Binding ProgramName, Mode=OneWay}"
+                                     AcceptsReturn="True"
+                                     IsReadOnly="True"
+                                     IsTabStop="False"
+                                     VerticalScrollBarVisibility="Auto"
+                                     HorizontalScrollBarVisibility="Disabled"
+                                     Padding="6"
+                                     TextWrapping="Wrap"
+                                     VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- 虚拟声卡设置卡片 -->
+                    <Border Background="#FBFBFB" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="14,10" Margin="0,1,0,13" Height="108">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xEC72;" FontSize="20" Foreground="#005FB8" VerticalAlignment="Center" Margin="2,0,10,0"/>
+
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
+                                <TextBlock Text="虚拟声卡设置" FontSize="13" FontWeight="SemiBold" Foreground="#1A1A1A"/>
+                                <TextBlock Text="{Binding DriverStatusDescription}" FontSize="11" Foreground="#666666" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                <Button Width="80" Height="36" Margin="0,0,6,0" Content="{Binding DriverActionButtonText}" Click="OnDriverActionButton_Click"/>
+                                <Button Width="130" Height="36" Margin="0,0,6,0" ToolTip="查看链路" Click="OnViewPipeline_Click">
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xE946;" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="查看音频链路" VerticalAlignment="Center" FontSize="12"/>
+                                    </StackPanel>
+                                </Button>
+                                <Button ToolTip="刷新状态" Padding="6" Height="36" Width="36" Click="OnRefreshDevices">
+                                    <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xE72C;" FontSize="13" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                </Button>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                </StackPanel>
+
+                <!-- 按钮图像置信度调整 -->
+                <Grid Grid.Row="3" Margin="0,30,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="图像识别置信度" VerticalAlignment="Center" Margin="10,0"/>
+                    <Slider x:Name="thresholdSlider" Grid.Column="1" Orientation="Horizontal" Minimum="0.05" Maximum="1.00" Value="0.70" AutoToolTipPlacement="None"
+                        TickFrequency="0.05" TickPlacement="BottomRight" IsSnapToTickEnabled="True" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0" Width="255"/>
+                    <TextBox x:Name="thresholdNumber" Grid.Column="2" Text="{Binding Value, ElementName=thresholdSlider, Mode=TwoWay, StringFormat={}{0:P0}}"
+                        Width="60" Margin="10,0" HorizontalAlignment="Left" TextAlignment="Center" IsReadOnly="True"/>
+                </Grid>
+
+                <!-- 截图按钮 -->
+                <Button Grid.Row="5" Content="截图语音按钮" Click="OnCaptureScreen" 
+                        HorizontalAlignment="Left" VerticalAlignment="Bottom" 
+                        Width="210" Height="42" Margin="20,0,0,21"/>
+
+                <!-- 播放按钮 -->
+                <Button Grid.Row="5" Content="播放到软件语音" Click="OnPlayAudio"
+                        HorizontalAlignment="Right" VerticalAlignment="Bottom" 
+                        Style="{DynamicResource AccentButtonStyle}"
+                        Width="210" Height="42" Margin="0,0,20,21"/>
+            </Grid>
+        </Grid>
+
+        <!-- 原生 Fluent 对话框蒙版层 -->
+        <Grid x:Name="DialogHost" Visibility="Collapsed" Background="#55000000" Panel.ZIndex="1000">
+            <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+                    Background="#FAFAFA" BorderBrush="#D0D0D0" BorderThickness="1"
+                    CornerRadius="8" MinWidth="380" MaxWidth="440" Padding="22"
+                    Effect="{DynamicResource DialogShadow}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock x:Name="DialogTitle" FontSize="16" FontWeight="SemiBold" Foreground="#1A1A1A" Margin="0,0,0,12"/>
+
+                    <ContentControl x:Name="DialogContent" Grid.Row="1" Margin="0,0,0,18"/>
+
+                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="DialogPrimaryBtn" MinWidth="80" Height="32" Margin="0,0,8,0"
+                                Style="{DynamicResource AccentButtonStyle}" Click="OnDialogPrimary_Click"/>
+                        <Button x:Name="DialogCloseBtn" MinWidth="80" Height="32"
+                                Click="OnDialogClose_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </Window>

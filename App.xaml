@@ -2,45 +2,11 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:AudioToMicWPF"
-             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             ThemeMode="System"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-
         <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ui:ThemeResources/>
-                <ui:XamlControlsResources/>
-            </ResourceDictionary.MergedDictionaries>
-
-            <Style x:Key="FlatButtonStyle" TargetType="Button">
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="BorderBrush" Value="#DDDDDD"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="Padding" Value="8 4"/>
-                <Setter Property="FontSize" Value="14"/>
-                <Setter Property="Foreground" Value="#333333"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}"
-                        BorderBrush="{TemplateBinding BorderBrush}"
-                        BorderThickness="{TemplateBinding BorderThickness}"
-                        CornerRadius="4">
-                                <ContentPresenter HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"/>
-                            </Border>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-                <Style.Triggers>
-                    <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="#F0F0F0"/>
-                        <Setter Property="Cursor" Value="Hand"/>
-                    </Trigger>
-                </Style.Triggers>
-            </Style>
-
+            <DropShadowEffect x:Key="DialogShadow" BlurRadius="24" Direction="270" ShadowDepth="4" Opacity="0.25" Color="#000000"/>
         </ResourceDictionary>
-
     </Application.Resources>
 </Application>
