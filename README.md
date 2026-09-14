@@ -1,72 +1,59 @@
-# convert-audiofile-to-software-mic (音频文件转软件语音)
+# convert-audiofile-to-software-mic
 
-![.NET](https://img.shields.io/badge/.NET-10.0-512BD4?style=flat-square&logo=dotnet)
-![Platform](https://img.shields.io/badge/Platform-Windows%2010%20%2F%2011-0078D4?style=flat-square&logo=windows)
-![UI](https://img.shields.io/badge/UI-Fluent%20(Mica)-005FB8?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+将音频文件转为聊天软件的麦克风语音输入（支持 QQNT、微信等通过按住按钮发送语音的聊天软件）。
 
-一个轻量、现代化的 Windows 桌面工具，用于将本地各类音频文件转为聊天软件（如 QQ、微信等）的麦克风语音输入。软件通过虚拟音频链路进行音频直通推流，并自动在屏幕上识别匹配语音按钮并模拟按住发送。
+## 重要说明
 
----
+- **软件需求**：依赖虚拟音频驱动（如 VB-CABLE 或 VoiceMeeter）。软件会自动检测并绑定系统中的虚拟音频设备。
+- **兼容性**：支持 Windows 10 / Windows 11，支持各类通过按住按钮发送语音的电脑端聊天软件。
 
-## ✨ 核心特性
+## 使用步骤
 
-- 🎨 **原生 Fluent 现代设计**：采用 Windows 11 Fluent 设计规范与 Mica（云母）半透明材质背景，交互与视觉现代精致。
-- 🔗 **虚拟声卡直通链路**：自动探测与管理系统虚拟声卡通道（支持 VB-Audio CABLE、VoiceMeeter 等），支持一键检测输出端与输入端的连接状态。
-- 🎵 **丰富音频格式支持**：内置多解码管线，全面支持 `MP3`、`WAV`、`FLAC`、`OGG (Vorbis)`、`M4A`、`AAC` 等常见格式。
-- ⚡ **高性能纯 C# 模板匹配**：采用基于 2D 积分图的高性能归一化互相关（NCC）图像匹配算法，**0 原生 C++/OpenCV 依赖**，运行轻快低内存。
-- ✂️ **交互式 Fluent 截图工具**：内置框选截图工具，支持拖拽框选、即时重选、ESC 退出与特征预览，轻松录入语音按钮样本。
+1. 打开准备发送语音的聊天窗口，并展开语音输入界面。关于窗口名称，例如群聊窗口在软件中一般显示为主程序名称（如“QQ”）。
 
----
+   ![说明](https://github.com/user-attachments/assets/6bf3b043-83d6-46e1-8680-268ee03fd013)
 
-## 🛠️ 准备工作
+2. 打开软件本体。若系统未安装虚拟音频驱动，可点击“安装驱动”前往官网下载（推荐 VB-CABLE，安装后点击刷新即可）。点击“查看音频链路”可查看当前输出与输入设备的对应关系。
 
-软件依赖虚拟音频驱动（将电脑播放的声音重定向为麦克风输入信号）：
+3. 点击“选择音频文件”，选择需要播放的音频文件（支持 mp3、wav、flac、ogg、m4a、aac 等格式）。选择成功后，输入框会显示对应文件路径。
 
-1. **安装虚拟音频驱动（推荐 VB-CABLE）**：
-   - 首次启动软件时，若未检测到驱动，可在主界面点击 **【安装驱动】** 前往官方网站免费下载安装（通过微软 WHQL 官方认证，无需重启系统）。
-2. **配置聊天软件麦克风**：
-   - 打开聊天软件（如 QQ、微信）的“设置 -> 音视频通话 / 声音”。
-   - 将聊天软件的 **麦克风输入设备** 修改为虚拟声卡对应的录音端（例如 `CABLE Output` 或 `VoiceMeeter Output`）。
+   ![a18c4333-3249-4e5d-97b1-f4e755e946ae](https://github.com/user-attachments/assets/7abb1533-430b-471a-99d1-c1778f589456)
 
----
+4. 点击“选择软件窗口”，在窗口列表中选中目标聊天窗口（如“QQ”），点击确认。
 
-## 🚀 使用步骤
+   ![bf7ff5ec-5659-495a-8572-04c2191f2ea9](https://github.com/user-attachments/assets/d0dc655d-e2bc-4635-9e82-8126c5164f7d)
 
-1. **绑定聊天窗口**：
-   - 打开准备发送语音的聊天对话框，展开“按住说话 / 发送语音”界面。
-   - 在本软件中点击 **【选择软件窗口】**，在列表中选中目标聊天窗口并确认。
-2. **采样语音按钮**：
-   - 点击 **【截图语音按钮】**，在屏幕上拖拽框选聊天窗口中的语音按钮并点击保存。
-   - 样本将自动保存并即时生效，后续若按钮外观未发生变化无需重复截图。
-3. **选择待发送音频**：
-   - 点击 **【选择音频文件】**，选中要发送的音频文件。
-4. **一键播放与发送**：
-   - 点击 **【播放到软件语音】**。
-   - 软件将自动将目标聊天窗口激活至前台、精准定位语音按钮并在播放期间持续模拟按住，音频播放完毕后自动释放完成发送。
+   - **注**：若目标窗口未出现在列表中，请先让聊天窗口显示在屏幕上，点击“刷新”后再次寻找。
 
----
+5. 确保聊天软件的麦克风输入已设置为对应的虚拟声卡通道。例如：
+   - 使用 VB-CABLE 时：本软件输出至 `CABLE Input`，聊天软件麦克风应设置为 `CABLE Output`。
+   - 使用 VoiceMeeter 时：输入端与输出端通道需相匹配。
 
-## 💡 常见问题与提示
+   ![未标题-2](https://github.com/user-attachments/assets/649c6b71-0061-4873-9808-bb4d91201af4)
 
-* **聊天软件接收到的语音无声或有电流杂音？**
-  * 请在 Windows 系统声音设置中，将虚拟声卡输入端与输出端的格式统一配置为 `48000Hz (DVD 音质)` 或 `44100Hz (CD 音质)` 16-bit / 24-bit。
-* **屏幕未找到语音按钮？**
-  * 请确保目标聊天窗口已展开语音输入面板，且未被其他不透明窗口遮挡；
-  * 可适当降低界面中的“图像识别置信度”滑块（推荐 60% ~ 75% 之间）；
-  * 如聊天软件更新了界面主题或切换了高分屏缩放比例，建议点击【截图语音按钮】重新截取一次。
+   - **注**：请在 Windows 系统设置或聊天软件内部设置中，将麦克风指定为虚拟声卡的 Output 端。
+   ![说明](https://github.com/user-attachments/assets/ec894435-003d-4b62-bcec-ec295b348f14)
 
----
+6. 点击“截图语音按钮”，框选聊天窗口中的语音按钮进行裁截。
 
-## 📦 技术栈与依赖
+   ![5c644045-93eb-4f73-a9b4-addb09fdbb22](https://github.com/user-attachments/assets/c8c1fbb5-4053-41c9-a418-ec995f0f40bf)
 
-- **运行时环境**：.NET 10.0 (`net10.0-windows`)
-- **界面与主题**：WPF / [iNKORE.UI.WPF.Modern](https://github.com/iNKORE-NET/UI.WPF.Modern)
-- **音频流处理**：[NAudio](https://github.com/naudio/NAudio) / [BunLabs.NAudio.Flac](https://github.com/BunLabs/NAudio.Flac) / [NVorbis](https://github.com/NVorbis/NVorbis)
+   - 可通过拖拽或两次点击确定选区。右键或点击“重选”可重新框选，按 ESC 键可退出。
+   - 确认框选后点击“保存截图”，图片将保存到软件同目录的 `Images/MicButton.png`。
 
----
+7. 完成上述设置后，点击“播放到软件语音”即可开始转录。软件会自动激活目标窗口、识别语音按钮并模拟按住发送。
 
-## 📄 开源许可证
+## 注意事项
 
-本项目基于 [MIT License](LICENSE) 协议开源。
-特别感谢 ETO-QSH 及开源社区各位贡献者的建议与支持。
+- 若点击播放后发现聊天软件录入的声音无声，建议在 Windows 系统声音控制面板中，将虚拟声卡输入和输出的采样率统一设置为 `44100Hz` 或 `48000Hz`。
+- 若播放时鼠标未准确停留在语音按钮上，可适当调节“图像识别置信度”滑块（默认 70%）；如更换了窗口主题或系统缩放比例，建议重新截图一次。
+
+## 鸣谢与依赖
+
+- 界面组件：[iNKORE.UI.WPF.Modern](https://github.com/iNKORE-NET/UI.WPF.Modern)
+- 音频处理：[NAudio](https://github.com/naudio/NAudio) / [BunLabs.NAudio.Flac](https://github.com/BunLabs/NAudio.Flac) / [NVorbis](https://github.com/NVorbis/NVorbis)
+- 特别感谢 ETO-QSH 对该软件的建议与修正。
+
+## 开源协议
+
+本项目采用 [MIT License](LICENSE) 协议。
