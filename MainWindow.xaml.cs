@@ -287,7 +287,6 @@ namespace AudioToMicWPF
             {
                 Text = title,
                 FontSize = 12,
-                FontWeight = FontWeights.Medium,
                 Foreground = Brushes.Gray,
                 VerticalAlignment = VerticalAlignment.Center
             });
@@ -297,7 +296,6 @@ namespace AudioToMicWPF
             {
                 Text = string.IsNullOrEmpty(deviceName) ? "（未找到设备）" : deviceName,
                 FontSize = 13,
-                FontWeight = FontWeights.SemiBold,
                 Margin = new Thickness(0, 4, 0, 0)
             });
 
@@ -421,7 +419,6 @@ namespace AudioToMicWPF
                     infoStack.Children.Add(new TextBlock
                     {
                         Text = "截图已保存",
-                        FontWeight = FontWeights.SemiBold,
                         FontSize = 13
                     });
                     infoStack.Children.Add(new TextBlock
