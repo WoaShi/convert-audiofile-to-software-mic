@@ -279,7 +279,7 @@ namespace AudioToMicWPF
                 FontFamily = new System.Windows.Media.FontFamily("Segoe Fluent Icons, Segoe MDL2 Assets"),
                 Text = iconGlyph,
                 FontSize = 13,
-                Foreground = Brushes.DodgerBlue,
+                Foreground = Brushes.Gray,
                 Margin = new Thickness(0, 0, 6, 0),
                 VerticalAlignment = VerticalAlignment.Center
             });
