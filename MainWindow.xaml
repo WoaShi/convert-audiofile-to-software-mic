@@ -94,7 +94,7 @@
 
                             <!-- 标题与说明（恢复原字体字号与圆润度） -->
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0" Cursor="Hand" MouseLeftButtonUp="OnPickFile">
-                                <TextBlock Text="音频文件选择" FontSize="14.5" FontWeight="SemiBold" Foreground="#1A1A1A"/>
+                                <TextBlock Text="音频文件选择" FontSize="14.5" Foreground="#1A1A1A"/>
                                 <TextBlock Text="点击选择将要使用的音频文件" FontSize="12" Foreground="#5C5C5C" Margin="0,4,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
 
@@ -132,7 +132,7 @@
 
                             <!-- 标题与说明（恢复原字体字号与圆润度） -->
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0" Cursor="Hand" MouseLeftButtonUp="GetQQWindow">
-                                <TextBlock Text="程序窗口选择" FontSize="14.5" FontWeight="SemiBold" Foreground="#1A1A1A"/>
+                                <TextBlock Text="程序窗口选择" FontSize="14.5" Foreground="#1A1A1A"/>
                                 <TextBlock Text="点击选择目标软件聊天窗口进行绑定" FontSize="12" Foreground="#5C5C5C" Margin="0,4,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
 
@@ -170,7 +170,7 @@
 
                             <!-- 标题与说明（恢复原字体字号与圆润度） -->
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
-                                <TextBlock Text="虚拟声卡设置" FontSize="14.5" FontWeight="SemiBold" Foreground="#1A1A1A"/>
+                                <TextBlock Text="虚拟声卡设置" FontSize="14.5" Foreground="#1A1A1A"/>
                                 <TextBlock Text="{Binding DriverStatusDescription}" FontSize="12" Foreground="#5C5C5C" Margin="0,4,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
 
