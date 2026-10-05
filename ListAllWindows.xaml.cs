@@ -1,19 +1,29 @@
-﻿using System.Diagnostics;
+using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows;
+using AudioToMicWPF.Services;
 
 namespace AudioToMicWPF
 {
     /// <summary>
-    /// ListAlllWindows.xaml 的交互逻辑
+    /// ListAllWindows.xaml 的交互逻辑
     /// </summary>
     public partial class ListAllWindows : Window
     {
         public static Process? chatProcess;
+
         public ListAllWindows()
         {
             InitializeComponent();
+            Title = LocalizationService.Instance.GetString("ListWindow_Title");
             LoadRunningProcesses();
+        }
+
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            ThemeService.Instance.ApplyWindowDarkMode(this, ThemeService.Instance.IsDark);
         }
 
         private void LoadRunningProcesses()
@@ -49,7 +59,6 @@ namespace AudioToMicWPF
 
         }
 
-
         private void OnRefresh(object sender, RoutedEventArgs e)
         {
             processListBox.Items.Clear();
@@ -66,7 +75,6 @@ namespace AudioToMicWPF
         [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
     }
-
 
     public class ProcessDisplay
     {
@@ -85,5 +93,3 @@ namespace AudioToMicWPF
         }
     }
 }
-
-

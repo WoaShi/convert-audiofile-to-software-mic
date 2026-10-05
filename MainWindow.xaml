@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:AudioToMicWPF"
         mc:Ignorable="d"
         Icon="Images\Wave.png"
-        Title="音频文件转软件语音" 
+        Title="{Binding WindowTitle}" 
         Height="750" Width="500"
         MinHeight="750" MinWidth="500"
         MaxHeight="750" MaxWidth="500"
@@ -14,7 +14,7 @@
         TextOptions.TextFormattingMode="Display"
         TextOptions.TextRenderingMode="ClearType"
         RenderOptions.ClearTypeHint="Enabled"
-        Background="#F3F3F3"
+        Background="{DynamicResource WindowBackgroundBrush}"
         WindowStartupLocation="CenterScreen">
 
     <Grid>
@@ -40,6 +40,54 @@
                 </Image>
             </Grid>
 
+            <!-- 顶部右上角 Fluent 操作栏：语言切换与暗色模式切换 -->
+            <StackPanel Orientation="Horizontal" 
+                        HorizontalAlignment="Right" 
+                        VerticalAlignment="Top" 
+                        Margin="0,12,16,0" 
+                        Panel.ZIndex="100">
+                <!-- 语言切换按钮（仅保留图标，点击展开 Fluent 子菜单） -->
+                <Button x:Name="LanguageButton"
+                        Style="{StaticResource FluentHeaderIconButton}"
+                        Width="36" Height="32"
+                        Margin="0,0,8,0"
+                        ToolTip="{DynamicResource Header_Language}"
+                        Click="OnLanguageButton_Click">
+                    <Button.ContextMenu>
+                        <ContextMenu Style="{StaticResource FluentContextMenu}">
+                            <MenuItem Header="简体中文"
+                                      Style="{StaticResource FluentMenuItem}"
+                                      IsChecked="{Binding IsChineseSelected, Mode=OneWay}"
+                                      Click="OnSelectChinese_Click"/>
+                            <MenuItem Header="English"
+                                      Style="{StaticResource FluentMenuItem}"
+                                      IsChecked="{Binding IsEnglishSelected, Mode=OneWay}"
+                                      Click="OnSelectEnglish_Click"/>
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                    <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" 
+                               Text="&#xE774;" 
+                               FontSize="14" 
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               VerticalAlignment="Center" 
+                               HorizontalAlignment="Center"/>
+                </Button>
+
+                <!-- 深色/浅色模式切换按钮 -->
+                <Button x:Name="ThemeToggleButton"
+                        Style="{StaticResource FluentHeaderIconButton}"
+                        Width="36" Height="32"
+                        ToolTip="{Binding ThemeButtonToolTip}"
+                        Click="OnThemeToggle_Click">
+                    <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" 
+                               Text="{Binding ThemeIconGlyph}" 
+                               FontSize="14" 
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               VerticalAlignment="Center" 
+                               HorizontalAlignment="Center"/>
+                </Button>
+            </StackPanel>
+
             <!-- 顶部两个操作大按钮（左侧固定对齐，无右外边距，防止裁切） -->
             <Button x:Name="FilePickerButton"
                     Width="130" Height="130"
@@ -49,7 +97,9 @@
                 <Button.Content>
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Image AutomationProperties.Name="Slice" Source="/Images/audio.png" Width="80" Height="80"/>
-                        <TextBlock Text="选择音频文件" FontSize="14" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                        <TextBlock Text="{DynamicResource Top_SelectAudio}" 
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontSize="14" HorizontalAlignment="Center" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Button.Content>
             </Button>
@@ -61,7 +111,9 @@
                 <Button.Content>
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
                         <Image AutomationProperties.Name="Slice" Source="/Images/window.png" Width="80" Height="80"/>
-                        <TextBlock Text="选择软件窗口" FontSize="14" HorizontalAlignment="Center" Margin="0,4,0,0"/>
+                        <TextBlock Text="{DynamicResource Top_SelectWindow}" 
+                                   Foreground="{DynamicResource TextPrimaryBrush}"
+                                   FontSize="14" HorizontalAlignment="Center" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Button.Content>
             </Button>
@@ -81,7 +133,9 @@
                 <StackPanel Height="360">
                 
                     <!-- 音频文件选择卡片 -->
-                    <Border Background="#FBFBFB" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="14,8" Margin="0,1,0,13" Height="108">
+                    <Border Background="{DynamicResource CardBackgroundBrush}" 
+                            BorderBrush="{DynamicResource CardBorderBrush}" 
+                            BorderThickness="1" CornerRadius="8" Padding="14,8" Margin="0,1,0,13" Height="108">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -89,23 +143,26 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- 图标（恢复中性灰色） -->
-                            <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xE8D6;" FontSize="20" Foreground="#5C5C5C" VerticalAlignment="Center" Margin="2,0,12,0"/>
+                            <!-- 图标 -->
+                            <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xE8D6;" FontSize="20" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="2,0,12,0"/>
 
-                            <!-- 标题与说明（恢复原字体字号与圆润度） -->
+                            <!-- 标题与说明 -->
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0" Cursor="Hand" MouseLeftButtonUp="OnPickFile">
-                                <TextBlock Text="音频文件选择" FontSize="14.5" Foreground="#1A1A1A"/>
-                                <TextBlock Text="点击选择将要使用的音频文件" FontSize="12" Foreground="#5C5C5C" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                                <TextBlock Text="{DynamicResource Card_AudioSelection_Title}" FontSize="14.5" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="{DynamicResource Card_AudioSelection_Desc}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
 
-                            <!-- 路径显示区（恢复【音频路径】小标题） -->
+                            <!-- 路径显示区 -->
                             <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="6,0,0,0">
-                                <TextBlock Text="音频路径" FontSize="12" FontWeight="Medium" Foreground="#2A2A2A" Margin="0,0,0,3"/>
+                                <TextBlock Text="{DynamicResource Card_AudioSelection_Header}" FontSize="12" FontWeight="Medium" Foreground="{DynamicResource TextMediumBrush}" Margin="0,0,0,3"/>
                                 <TextBox x:Name="pathShower"
                                          Height="62"
                                          Width="240"
                                          FontFamily="Consolas"
                                          FontSize="11"
+                                         Background="{DynamicResource ControlBackgroundBrush}"
+                                         Foreground="{DynamicResource TextPrimaryBrush}"
+                                         BorderBrush="{DynamicResource ControlBorderBrush}"
                                          Text="{Binding SelectedFilePath, Mode=OneWay}"
                                          AcceptsReturn="True"
                                          IsReadOnly="True"
@@ -119,7 +176,9 @@
                     </Border>
 
                     <!-- 目标窗口选择卡片 -->
-                    <Border Background="#FBFBFB" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="14,8" Margin="0,1,0,13" Height="108">
+                    <Border Background="{DynamicResource CardBackgroundBrush}" 
+                            BorderBrush="{DynamicResource CardBorderBrush}" 
+                            BorderThickness="1" CornerRadius="8" Padding="14,8" Margin="0,1,0,13" Height="108">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -127,23 +186,26 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- 图标（恢复中性灰色） -->
-                            <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xF7ED;" FontSize="20" Foreground="#5C5C5C" VerticalAlignment="Center" Margin="2,0,12,0"/>
+                            <!-- 图标 -->
+                            <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xF7ED;" FontSize="20" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="2,0,12,0"/>
 
-                            <!-- 标题与说明（恢复原字体字号与圆润度） -->
+                            <!-- 标题与说明 -->
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0" Cursor="Hand" MouseLeftButtonUp="GetQQWindow">
-                                <TextBlock Text="程序窗口选择" FontSize="14.5" Foreground="#1A1A1A"/>
-                                <TextBlock Text="点击选择目标软件聊天窗口进行绑定" FontSize="12" Foreground="#5C5C5C" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                                <TextBlock Text="{DynamicResource Card_WindowSelection_Title}" FontSize="14.5" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="{DynamicResource Card_WindowSelection_Desc}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
 
-                            <!-- 窗口信息显示区（恢复【程序窗口】小标题） -->
+                            <!-- 窗口信息显示区 -->
                             <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="6,0,0,0">
-                                <TextBlock Text="程序窗口" FontSize="12" FontWeight="Medium" Foreground="#2A2A2A" Margin="0,0,0,3"/>
+                                <TextBlock Text="{DynamicResource Card_WindowSelection_Header}" FontSize="12" FontWeight="Medium" Foreground="{DynamicResource TextMediumBrush}" Margin="0,0,0,3"/>
                                 <TextBox x:Name="proccessName"
                                          Height="62"
                                          Width="240"
                                          FontFamily="Consolas"
                                          FontSize="11"
+                                         Background="{DynamicResource ControlBackgroundBrush}"
+                                         Foreground="{DynamicResource TextPrimaryBrush}"
+                                         BorderBrush="{DynamicResource ControlBorderBrush}"
                                          Text="{Binding ProgramName, Mode=OneWay}"
                                          AcceptsReturn="True"
                                          IsReadOnly="True"
@@ -157,7 +219,9 @@
                     </Border>
 
                     <!-- 虚拟声卡设置卡片 -->
-                    <Border Background="#FBFBFB" BorderBrush="#E0E0E0" BorderThickness="1" CornerRadius="8" Padding="14,8" Margin="0,1,0,13" Height="108">
+                    <Border Background="{DynamicResource CardBackgroundBrush}" 
+                            BorderBrush="{DynamicResource CardBorderBrush}" 
+                            BorderThickness="1" CornerRadius="8" Padding="14,8" Margin="0,1,0,13" Height="108">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -165,26 +229,33 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- 图标（恢复中性灰色） -->
-                            <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xEC72;" FontSize="20" Foreground="#5C5C5C" VerticalAlignment="Center" Margin="2,0,12,0"/>
+                            <!-- 图标 -->
+                            <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xEC72;" FontSize="20" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="2,0,12,0"/>
 
-                            <!-- 标题与说明（恢复原字体字号与圆润度） -->
+                            <!-- 标题与说明 -->
                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,8,0">
-                                <TextBlock Text="虚拟声卡设置" FontSize="14.5" Foreground="#1A1A1A"/>
-                                <TextBlock Text="{Binding DriverStatusDescription}" FontSize="12" Foreground="#5C5C5C" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                                <TextBlock Text="{DynamicResource Card_Driver_Title}" FontSize="14.5" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <TextBlock Text="{Binding DriverStatusDescription}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0" TextWrapping="Wrap"/>
                             </StackPanel>
 
                             <!-- 按钮组 -->
                             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                <Button Width="80" Height="36" Margin="0,0,6,0" Content="{Binding DriverActionButtonText}" Click="OnDriverActionButton_Click"/>
-                                <Button Width="130" Height="36" Margin="0,0,6,0" ToolTip="查看链路" Click="OnViewPipeline_Click">
+                                <Button Width="80" Height="36" Margin="0,0,6,0" Padding="2" Click="OnDriverActionButton_Click">
+                                    <TextBlock Text="{Binding DriverActionButtonText}" 
+                                               FontSize="{Binding DriverActionButtonFontSize}" 
+                                               TextWrapping="Wrap" 
+                                               TextAlignment="Center" 
+                                               VerticalAlignment="Center" 
+                                               HorizontalAlignment="Center"/>
+                                </Button>
+                                <Button Width="130" Height="36" Margin="0,0,6,0" ToolTip="{DynamicResource Driver_Tooltip_Pipeline}" Click="OnViewPipeline_Click">
                                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                        <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xE946;" FontSize="13" Foreground="#5C5C5C" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                                        <TextBlock Text="查看音频链路" VerticalAlignment="Center" FontSize="12"/>
+                                        <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xE946;" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{DynamicResource Driver_View_Pipeline}" VerticalAlignment="Center" FontSize="12"/>
                                     </StackPanel>
                                 </Button>
-                                <Button ToolTip="刷新状态" Padding="6" Height="36" Width="36" Click="OnRefreshDevices">
-                                    <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xE72C;" FontSize="13" Foreground="#5C5C5C" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                                <Button ToolTip="{DynamicResource Driver_Tooltip_Refresh}" Padding="6" Height="36" Width="36" Click="OnRefreshDevices">
+                                    <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xE72C;" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                                 </Button>
                             </StackPanel>
                         </Grid>
@@ -200,20 +271,22 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock Text="图像识别置信度" VerticalAlignment="Center" Margin="10,0"/>
+                    <TextBlock Text="{DynamicResource Slider_Confidence}" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="10,0,8,0" FontSize="12.5"/>
                     <Slider x:Name="thresholdSlider" Grid.Column="1" Orientation="Horizontal" Minimum="0.05" Maximum="1.00" Value="0.70" AutoToolTipPlacement="None"
-                        TickFrequency="0.05" TickPlacement="BottomRight" IsSnapToTickEnabled="True" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0" Width="255"/>
+                        TickFrequency="0.05" TickPlacement="BottomRight" IsSnapToTickEnabled="True" VerticalAlignment="Center" HorizontalAlignment="Stretch" Margin="4,0,8,0"/>
                     <TextBox x:Name="thresholdNumber" Grid.Column="2" Text="{Binding Value, ElementName=thresholdSlider, Mode=TwoWay, StringFormat={}{0:P0}}"
-                        Width="60" Margin="10,0" HorizontalAlignment="Left" TextAlignment="Center" IsReadOnly="True"/>
+                        Background="{DynamicResource ControlBackgroundBrush}" Foreground="{DynamicResource TextPrimaryBrush}" BorderBrush="{DynamicResource ControlBorderBrush}"
+                        Width="52" Height="26" VerticalAlignment="Center" Margin="0,0,10,0" TextAlignment="Center" IsReadOnly="True" Padding="0,3"/>
                 </Grid>
 
                 <!-- 截图按钮 -->
-                <Button Grid.Row="5" Content="截图语音按钮" Click="OnCaptureScreen" 
+                <Button Grid.Row="5" Content="{DynamicResource Btn_Capture}" Click="OnCaptureScreen" 
+                        Foreground="{DynamicResource TextPrimaryBrush}"
                         HorizontalAlignment="Left" VerticalAlignment="Bottom" 
                         Width="210" Height="42" Margin="20,0,0,21"/>
 
                 <!-- 播放按钮 -->
-                <Button Grid.Row="5" Content="播放到软件语音" Click="OnPlayAudio"
+                <Button Grid.Row="5" Content="{DynamicResource Btn_Play}" Click="OnPlayAudio"
                         HorizontalAlignment="Right" VerticalAlignment="Bottom" 
                         Style="{DynamicResource AccentButtonStyle}"
                         Width="210" Height="42" Margin="0,0,20,21"/>
@@ -221,9 +294,11 @@
         </Grid>
 
         <!-- 原生 Fluent 对话框蒙版层 -->
-        <Grid x:Name="DialogHost" Visibility="Collapsed" Background="#55000000" Panel.ZIndex="1000">
+        <Grid x:Name="DialogHost" Visibility="Collapsed" Background="{DynamicResource DialogOverlayBrush}" Panel.ZIndex="1000">
             <Border HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Background="#FAFAFA" BorderBrush="#D0D0D0" BorderThickness="1"
+                    Background="{DynamicResource DialogBackgroundBrush}" 
+                    BorderBrush="{DynamicResource DialogBorderBrush}" 
+                    BorderThickness="1"
                     CornerRadius="8" MinWidth="380" MaxWidth="440" Padding="22"
                     Effect="{DynamicResource DialogShadow}">
                 <Grid>
@@ -233,14 +308,15 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <TextBlock x:Name="DialogTitle" FontSize="16" Foreground="#1A1A1A" Margin="0,0,0,12"/>
+                    <TextBlock x:Name="DialogTitle" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,12"/>
 
-                    <ContentControl x:Name="DialogContent" Grid.Row="1" Margin="0,0,0,18"/>
+                    <ContentControl x:Name="DialogContent" Grid.Row="1" Margin="0,0,0,20" Foreground="{DynamicResource TextPrimaryBrush}"/>
 
                     <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
-                        <Button x:Name="DialogPrimaryBtn" MinWidth="80" Height="32" Margin="0,0,8,0"
+                        <Button x:Name="DialogPrimaryBtn" MinWidth="80" Height="32" Padding="12,0" Margin="0,0,8,0"
                                 Style="{DynamicResource AccentButtonStyle}" Click="OnDialogPrimary_Click"/>
-                        <Button x:Name="DialogCloseBtn" MinWidth="80" Height="32"
+                        <Button x:Name="DialogCloseBtn" MinWidth="80" Height="32" Padding="12,0"
+                                Foreground="{DynamicResource TextPrimaryBrush}"
                                 Click="OnDialogClose_Click"/>
                     </StackPanel>
                 </Grid>

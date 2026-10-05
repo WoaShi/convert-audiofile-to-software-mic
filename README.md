@@ -1,5 +1,7 @@
 # convert-audiofile-to-software-mic
 
+[English](README_EN.md) | [简体中文](README.md)
+
 将音频文件转为聊天软件的麦克风语音输入（支持 QQNT、微信等通过按住按钮发送语音的聊天软件）。
 
 ## 重要说明

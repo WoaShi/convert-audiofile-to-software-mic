@@ -7,6 +7,107 @@
     <Application.Resources>
         <ResourceDictionary>
             <DropShadowEffect x:Key="DialogShadow" BlurRadius="24" Direction="270" ShadowDepth="4" Opacity="0.25" Color="#000000"/>
+
+            <!-- 顶部 Fluent 图标操作按钮样式 -->
+            <Style x:Key="FluentHeaderIconButton" TargetType="Button">
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Background" Value="{DynamicResource HeaderButtonBackgroundBrush}"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource HeaderButtonBorderBrush}"/>
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                CornerRadius="6"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{DynamicResource HeaderButtonHoverBrush}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.75"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Fluent 弹出子菜单样式 -->
+            <Style x:Key="FluentContextMenu" TargetType="ContextMenu">
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+                <Setter Property="OverridesDefaultStyle" Value="True"/>
+                <Setter Property="Grid.IsSharedSizeScope" Value="True"/>
+                <Setter Property="HasDropShadow" Value="True"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ContextMenu">
+                            <Border Background="{DynamicResource MenuBackgroundBrush}"
+                                    BorderBrush="{DynamicResource MenuBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="8"
+                                    Padding="4"
+                                    MinWidth="110"
+                                    Effect="{StaticResource DialogShadow}">
+                                <StackPanel IsItemsHost="True" KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Fluent 菜单项样式 -->
+            <Style x:Key="FluentMenuItem" TargetType="MenuItem">
+                <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                <Setter Property="FontSize" Value="12.5"/>
+                <Setter Property="Padding" Value="8,6"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="MenuItem">
+                            <Border x:Name="border"
+                                    CornerRadius="5"
+                                    Background="Transparent"
+                                    Padding="{TemplateBinding Padding}">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="20"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock x:Name="checkIcon"
+                                               Grid.Column="0"
+                                               FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                               Text="&#xE73E;"
+                                               FontSize="11"
+                                               Foreground="{DynamicResource TextPrimaryBrush}"
+                                               VerticalAlignment="Center"
+                                               HorizontalAlignment="Left"
+                                               Visibility="Collapsed"/>
+                                    <ContentPresenter Grid.Column="1"
+                                                      ContentSource="Header"
+                                                      RecognizesAccessKey="True"
+                                                      VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter TargetName="checkIcon" Property="Visibility" Value="Visible"/>
+                                </Trigger>
+                                <Trigger Property="IsHighlighted" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="{DynamicResource MenuItemHoverBrush}"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

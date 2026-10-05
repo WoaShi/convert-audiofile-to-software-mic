@@ -27,7 +27,9 @@ namespace AudioToMicWPF.Services
 
             if (!File.Exists(resolvedPath))
             {
-                System.Windows.MessageBox.Show($"未找到语音按钮特征图片：{resolvedPath}\n请先点击“截图语音按钮”进行裁截！", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                string msg = LocalizationService.Instance.GetString("Locate_MissingImage", resolvedPath);
+                string title = LocalizationService.Instance.GetString("Dialog_Notice");
+                System.Windows.MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -41,7 +43,9 @@ namespace AudioToMicWPF.Services
             }
             catch (Exception ex)
             {
-                System.Windows.MessageBox.Show($"加载语音按钮图片失败：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                string msg = LocalizationService.Instance.GetString("Locate_LoadError", ex.Message);
+                string title = LocalizationService.Instance.GetString("Dialog_Error");
+                System.Windows.MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
@@ -69,10 +73,9 @@ namespace AudioToMicWPF.Services
                     }
                     else
                     {
-                        System.Windows.MessageBox.Show(
-                            $"未在屏幕上匹配到语音按钮！(当前最高相似度: {matchResult.Score:P0}，设定阈值: {_threshold:P0})\n" +
-                            "请确认聊天窗口已处于前台且语音面板处于展开状态，或适当降低置信度阈值。",
-                            "匹配提示", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        string msg = LocalizationService.Instance.GetString("Locate_NoMatch", matchResult.Score, _threshold);
+                        string title = LocalizationService.Instance.GetString("Locate_NoticeTitle");
+                        System.Windows.MessageBox.Show(msg, title, MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
                 }
             }

@@ -33,8 +33,8 @@
             <!-- Fluent 悬浮操作控制条 -->
             <Border Name="ButtonPanel"
                     Visibility="Collapsed"
-                    Background="#F9FFFFFF"
-                    BorderBrush="#D6D6D6"
+                    Background="{DynamicResource CapturePanelBackgroundBrush}"
+                    BorderBrush="{DynamicResource CapturePanelBorderBrush}"
                     BorderThickness="1"
                     CornerRadius="8"
                     Padding="8"
@@ -49,22 +49,24 @@
                             Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xE74E;" FontSize="13" Margin="0,0,6,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="保存截图" FontSize="12" VerticalAlignment="Center"/>
+                            <TextBlock Text="{DynamicResource Capture_Save}" FontSize="12" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Click="ResetButton_Click"
+                            Foreground="{DynamicResource TextPrimaryBrush}"
                             Height="32" Padding="10,0"
                             Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xE7A7;" FontSize="13" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="重选" FontSize="12" VerticalAlignment="Center"/>
+                            <TextBlock Text="{DynamicResource Capture_Reselect}" FontSize="12" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     <Button Click="CancelButton_Click"
+                            Foreground="{DynamicResource TextPrimaryBrush}"
                             Height="32" Padding="10,0">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                             <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xE711;" FontSize="13" Margin="0,0,5,0" VerticalAlignment="Center"/>
-                            <TextBlock Text="取消" FontSize="12" VerticalAlignment="Center"/>
+                            <TextBlock Text="{DynamicResource Capture_Cancel}" FontSize="12" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </StackPanel>
@@ -86,7 +88,7 @@
             </Border.Effect>
             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                 <TextBlock FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" Text="&#xE722;" FontSize="14" Foreground="#FFFFFF" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                <TextBlock Text="拖拽或点击选定语音按钮区域 (右键重选 · ESC 退出)" Foreground="#FFFFFF" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
+                <TextBlock Text="{DynamicResource Capture_Instruction}" Foreground="#FFFFFF" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
             </StackPanel>
         </Border>
     </Grid>

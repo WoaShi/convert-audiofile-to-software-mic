@@ -22,8 +22,12 @@ namespace AudioToMicWPF
     {
         private string? _selectedFilePath;
         private string? _programName;
-        private string _driverStatusDescription = "驱动状态: 未安装";
-        private string _driverActionButtonText = "安装驱动";
+        private string _driverStatusDescription = string.Empty;
+        private string _driverActionButtonText = string.Empty;
+        private string _themeIconGlyph = "\uE708";
+        private string _themeButtonToolTip = "切换至深色模式";
+        private string _languageButtonText = "EN";
+        private string _windowTitle = "音频文件转软件语音";
 
         public string? SelectedFilePath
         {
@@ -79,6 +83,98 @@ namespace AudioToMicWPF
 
         public bool IsDriverInstalled { get; set; }
 
+        public string ThemeIconGlyph
+        {
+            get => _themeIconGlyph;
+            set
+            {
+                if (_themeIconGlyph != value)
+                {
+                    _themeIconGlyph = value;
+                    OnPropertyChanged(nameof(ThemeIconGlyph));
+                }
+            }
+        }
+
+        public string ThemeButtonToolTip
+        {
+            get => _themeButtonToolTip;
+            set
+            {
+                if (_themeButtonToolTip != value)
+                {
+                    _themeButtonToolTip = value;
+                    OnPropertyChanged(nameof(ThemeButtonToolTip));
+                }
+            }
+        }
+
+        public string LanguageButtonText
+        {
+            get => _languageButtonText;
+            set
+            {
+                if (_languageButtonText != value)
+                {
+                    _languageButtonText = value;
+                    OnPropertyChanged(nameof(LanguageButtonText));
+                }
+            }
+        }
+
+        public string WindowTitle
+        {
+            get => _windowTitle;
+            set
+            {
+                if (_windowTitle != value)
+                {
+                    _windowTitle = value;
+                    OnPropertyChanged(nameof(WindowTitle));
+                }
+            }
+        }
+
+        private double _driverActionButtonFontSize = 12;
+        public double DriverActionButtonFontSize
+        {
+            get => _driverActionButtonFontSize;
+            set
+            {
+                if (_driverActionButtonFontSize != value)
+                {
+                    _driverActionButtonFontSize = value;
+                    OnPropertyChanged(nameof(DriverActionButtonFontSize));
+                }
+            }
+        }
+
+        public bool IsChineseSelected => LocalizationService.Instance.CurrentLanguage == AppLanguage.Chinese;
+        public bool IsEnglishSelected => LocalizationService.Instance.CurrentLanguage == AppLanguage.English;
+
+        public void RefreshLocalizationAndTheme()
+        {
+            bool isDark = ThemeService.Instance.IsDark;
+            ThemeIconGlyph = isDark ? "\uE706" : "\uE708";
+            ThemeButtonToolTip = LocalizationService.Instance.GetString(isDark ? "Header_Theme_ToLight" : "Header_Theme_ToDark");
+
+            LanguageButtonText = LocalizationService.Instance.GetString("Header_Language_BtnText");
+            WindowTitle = LocalizationService.Instance.GetString("App_Title");
+
+            DriverStatusDescription = IsDriverInstalled
+                ? LocalizationService.Instance.GetString("Driver_Status_Installed")
+                : LocalizationService.Instance.GetString("Driver_Status_NotInstalled");
+            DriverActionButtonText = IsDriverInstalled
+                ? LocalizationService.Instance.GetString("Driver_Action_Website")
+                : LocalizationService.Instance.GetString("Driver_Action_Install");
+
+            // 只有文本长度超出按钮单行容纳限制（溢出）时才缩小字号为 10.5；正常情况下保持未缩小的 12pt 标准字号
+            DriverActionButtonFontSize = DriverActionButtonText.Length > 6 ? 10.5 : 12;
+
+            OnPropertyChanged(nameof(IsChineseSelected));
+            OnPropertyChanged(nameof(IsEnglishSelected));
+        }
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         protected void OnPropertyChanged(string propertyName)
@@ -90,7 +186,6 @@ namespace AudioToMicWPF
         [DllImport("dwmapi.dll")]
         private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attr, ref int attrValue, int attrSize);
 
-        private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;
         private const int DWMWA_SYSTEMBACKDROP_TYPE = 38;
 
         public enum DialogButtonResult
@@ -109,7 +204,24 @@ namespace AudioToMicWPF
             InitializeComponent();
             DataContext = viewModel;
             findDevicesServices = new FindDevicesServices();
+
+            // 订阅主题与语言切换事件
+            ThemeService.Instance.ThemeChanged += OnThemeChanged;
+            LocalizationService.Instance.LanguageChanged += OnLanguageChanged;
+
             RefreshDriverState();
+            viewModel.RefreshLocalizationAndTheme();
+        }
+
+        private void OnThemeChanged(bool isDark)
+        {
+            viewModel.RefreshLocalizationAndTheme();
+            TryApplyMica();
+        }
+
+        private void OnLanguageChanged(AppLanguage lang)
+        {
+            viewModel.RefreshLocalizationAndTheme();
         }
 
         protected override void OnSourceInitialized(EventArgs e)
@@ -123,6 +235,8 @@ namespace AudioToMicWPF
             try
             {
                 var hwnd = new WindowInteropHelper(this).Handle;
+                ThemeService.Instance.ApplyWindowDarkMode(this, ThemeService.Instance.IsDark);
+
                 if (Environment.OSVersion.Version.Major >= 10 && Environment.OSVersion.Version.Build >= 22000)
                 {
                     int backdropType = 2; // DWMSBT_MAINWINDOW (Mica)
@@ -139,8 +253,10 @@ namespace AudioToMicWPF
             }
         }
 
-        public Task<DialogButtonResult> ShowDialogAsync(string title, object content, string? primaryText = null, string? closeText = "确定")
+        public Task<DialogButtonResult> ShowDialogAsync(string title, object content, string? primaryText = null, string? closeText = null)
         {
+            closeText ??= LocalizationService.Instance.GetString("Dialog_OK");
+
             DialogTitle.Text = title;
             DialogContent.Content = content;
 
@@ -187,14 +303,14 @@ namespace AudioToMicWPF
             findDevicesServices.RefreshDevices();
             var virtualPipelineInfo = VirtualAudioDriverService.DetectPipeline();
             viewModel.IsDriverInstalled = virtualPipelineInfo.IsInstalled;
-            viewModel.DriverStatusDescription = virtualPipelineInfo.IsInstalled ? "驱动状态: 已安装" : "驱动状态: 未安装";
-            viewModel.DriverActionButtonText = virtualPipelineInfo.IsInstalled ? "官网页面" : "安装驱动";
+            viewModel.RefreshLocalizationAndTheme();
         }
 
         private void OnPickFile(object sender, RoutedEventArgs e)
         {
             string text = new FilePickerServices().OpenFilePicker();
-            if (text != "未选择音频文件！")
+            string notSelected = LocalizationService.Instance.GetString("FilePicker_NoFile");
+            if (text != notSelected && text != "未选择音频文件！")
             {
                 viewModel.SelectedFilePath = text;
             }
@@ -205,16 +321,44 @@ namespace AudioToMicWPF
             RefreshDriverState();
         }
 
+        private void OnThemeToggle_Click(object sender, RoutedEventArgs e)
+        {
+            ThemeService.Instance.ToggleTheme();
+        }
+
+        private void OnLanguageButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button btn && btn.ContextMenu != null)
+            {
+                btn.ContextMenu.PlacementTarget = btn;
+                btn.ContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+                btn.ContextMenu.IsOpen = true;
+            }
+        }
+
+        private void OnSelectChinese_Click(object sender, RoutedEventArgs e)
+        {
+            LocalizationService.Instance.SetLanguage(AppLanguage.Chinese);
+        }
+
+        private void OnSelectEnglish_Click(object sender, RoutedEventArgs e)
+        {
+            LocalizationService.Instance.SetLanguage(AppLanguage.English);
+        }
+
         private async void OnViewPipeline_Click(object sender, RoutedEventArgs e)
         {
             var virtualPipelineInfo = VirtualAudioDriverService.DetectPipeline();
+            string pipelineTitle = LocalizationService.Instance.GetString("Dialog_Pipeline_Title");
+            string okText = LocalizationService.Instance.GetString("Dialog_OK");
+
             if (virtualPipelineInfo.IsInstalled)
             {
                 var panel = new StackPanel { Width = 360, Margin = new Thickness(0, 4, 0, 0) };
 
                 // 播放输出端节点
                 panel.Children.Add(CreatePipelineDeviceCard(
-                    "播放输出端",
+                    LocalizationService.Instance.GetString("Dialog_Pipeline_PlaybackOutput"),
                     virtualPipelineInfo.OutputDeviceName,
                     "\uE767"));
 
@@ -229,17 +373,17 @@ namespace AudioToMicWPF
                     FontFamily = new System.Windows.Media.FontFamily("Segoe Fluent Icons, Segoe MDL2 Assets"),
                     Text = "\uE74B",
                     FontSize = 14,
-                    Foreground = Brushes.Gray
+                    Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextSecondaryBrush"]
                 });
                 panel.Children.Add(arrowStack);
 
                 // 录音输入端节点
                 panel.Children.Add(CreatePipelineDeviceCard(
-                    "录音输入端",
+                    LocalizationService.Instance.GetString("Dialog_Pipeline_RecordInput"),
                     virtualPipelineInfo.InputDeviceName,
                     "\uE720"));
 
-                await ShowDialogAsync("链路", panel, null, "确定");
+                await ShowDialogAsync(pipelineTitle, panel, null, okText);
             }
             else
             {
@@ -247,12 +391,16 @@ namespace AudioToMicWPF
 
                 panel.Children.Add(new TextBlock
                 {
-                    Text = "未检测到虚拟音频驱动。",
+                    Text = LocalizationService.Instance.GetString("Dialog_Pipeline_DriverNotInstalled"),
                     FontSize = 13,
+                    Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextPrimaryBrush"],
                     Margin = new Thickness(0, 4, 0, 10)
                 });
 
-                var result = await ShowDialogAsync("链路", panel, "下载驱动", "取消");
+                string downloadDriverText = LocalizationService.Instance.GetString("Dialog_DownloadDriver");
+                string cancelText = LocalizationService.Instance.GetString("Dialog_Cancel");
+
+                var result = await ShowDialogAsync(pipelineTitle, panel, downloadDriverText, cancelText);
                 if (result == DialogButtonResult.Primary)
                 {
                     VirtualAudioDriverService.OpenDriverDownloadPage();
@@ -264,8 +412,8 @@ namespace AudioToMicWPF
         {
             var border = new Border
             {
-                Background = new SolidColorBrush(Color.FromArgb(16, 128, 128, 128)),
-                BorderBrush = new SolidColorBrush(Color.FromArgb(40, 128, 128, 128)),
+                Background = (System.Windows.Media.Brush)Application.Current.Resources["DialogCardBackgroundBrush"],
+                BorderBrush = (System.Windows.Media.Brush)Application.Current.Resources["DialogCardBorderBrush"],
                 BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(6),
                 Padding = new Thickness(12, 10, 12, 10)
@@ -279,7 +427,7 @@ namespace AudioToMicWPF
                 FontFamily = new System.Windows.Media.FontFamily("Segoe Fluent Icons, Segoe MDL2 Assets"),
                 Text = iconGlyph,
                 FontSize = 13,
-                Foreground = Brushes.Gray,
+                Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextSecondaryBrush"],
                 Margin = new Thickness(0, 0, 6, 0),
                 VerticalAlignment = VerticalAlignment.Center
             });
@@ -287,15 +435,16 @@ namespace AudioToMicWPF
             {
                 Text = title,
                 FontSize = 12,
-                Foreground = Brushes.Gray,
+                Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextSecondaryBrush"],
                 VerticalAlignment = VerticalAlignment.Center
             });
             stack.Children.Add(headerStack);
 
             stack.Children.Add(new TextBlock
             {
-                Text = string.IsNullOrEmpty(deviceName) ? "（未找到设备）" : deviceName,
+                Text = string.IsNullOrEmpty(deviceName) ? LocalizationService.Instance.GetString("Dialog_Pipeline_NotFound") : deviceName,
                 FontSize = 13,
+                Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextPrimaryBrush"],
                 Margin = new Thickness(0, 4, 0, 0)
             });
 
@@ -310,16 +459,24 @@ namespace AudioToMicWPF
 
         private async void OnPlayAudio(object sender, RoutedEventArgs e)
         {
+            string noticeTitle = LocalizationService.Instance.GetString("Dialog_Notice");
+            string okText = LocalizationService.Instance.GetString("Dialog_OK");
+
             if (string.IsNullOrEmpty(viewModel.SelectedFilePath) || !File.Exists(viewModel.SelectedFilePath))
             {
-                await ShowDialogAsync("提示", "尚未选择音频文件，请先点击【选择音频文件】进行选择！", null, "确定");
+                await ShowDialogAsync(noticeTitle, LocalizationService.Instance.GetString("Dialog_NoAudioSelected"), null, okText);
                 return;
             }
 
             var pipeline = VirtualAudioDriverService.DetectPipeline();
             if (!pipeline.IsInstalled || pipeline.OutputDeviceID < 0)
             {
-                var result = await ShowDialogAsync("声卡未就绪", "未检测到虚拟声卡设备，请先点击【安装驱动】完成声卡驱动配置！", "前往安装驱动", "取消");
+                string notReadyTitle = LocalizationService.Instance.GetString("Dialog_DriverNotReady_Title");
+                string notReadyMsg = LocalizationService.Instance.GetString("Dialog_DriverNotReady_Msg");
+                string goInstallText = LocalizationService.Instance.GetString("Dialog_GoInstallDriver");
+                string cancelText = LocalizationService.Instance.GetString("Dialog_Cancel");
+
+                var result = await ShowDialogAsync(notReadyTitle, notReadyMsg, goInstallText, cancelText);
                 if (result == DialogButtonResult.Primary)
                 {
                     VirtualAudioDriverService.OpenDriverDownloadPage();
@@ -329,7 +486,7 @@ namespace AudioToMicWPF
 
             if (ListAllWindows.chatProcess == null || ListAllWindows.chatProcess.HasExited || ListAllWindows.chatProcess.MainWindowHandle == IntPtr.Zero)
             {
-                await ShowDialogAsync("提示", "请先点击【选择软件窗口】绑定目标聊天软件窗口！", null, "确定");
+                await ShowDialogAsync(noticeTitle, LocalizationService.Instance.GetString("Dialog_NoWindowBound"), null, okText);
                 return;
             }
 
@@ -344,7 +501,9 @@ namespace AudioToMicWPF
             }
             catch (Exception ex)
             {
-                await ShowDialogAsync("播放出错", $"播放音频时发生错误：\n{ex.Message}", null, "确定");
+                string errTitle = LocalizationService.Instance.GetString("Dialog_PlaybackError_Title");
+                string errMsg = LocalizationService.Instance.GetString("Dialog_PlaybackError_Msg", ex.Message);
+                await ShowDialogAsync(errTitle, errMsg, null, okText);
             }
         }
 
@@ -383,8 +542,8 @@ namespace AudioToMicWPF
                     // 截图详情展示卡片
                     var previewBorder = new Border
                     {
-                        Background = new SolidColorBrush(Color.FromArgb(16, 128, 128, 128)),
-                        BorderBrush = new SolidColorBrush(Color.FromArgb(40, 128, 128, 128)),
+                        Background = (System.Windows.Media.Brush)Application.Current.Resources["DialogCardBackgroundBrush"],
+                        BorderBrush = (System.Windows.Media.Brush)Application.Current.Resources["DialogCardBorderBrush"],
                         BorderThickness = new Thickness(1),
                         CornerRadius = new CornerRadius(6),
                         Padding = new Thickness(12)
@@ -418,21 +577,24 @@ namespace AudioToMicWPF
                     Grid.SetColumn(infoStack, 2);
                     infoStack.Children.Add(new TextBlock
                     {
-                        Text = "截图已保存",
-                        FontSize = 13
+                        Text = LocalizationService.Instance.GetString("Dialog_Capture_Saved"),
+                        FontSize = 13,
+                        Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextPrimaryBrush"]
                     });
                     infoStack.Children.Add(new TextBlock
                     {
-                        Text = $"尺寸: {value.Width} × {value.Height} 像素",
+                        Text = LocalizationService.Instance.GetString("Dialog_Capture_Dimensions", value.Width, value.Height),
                         FontSize = 12,
-                        Foreground = Brushes.Gray,
+                        Foreground = (System.Windows.Media.Brush)Application.Current.Resources["TextSecondaryBrush"],
                         Margin = new Thickness(0, 4, 0, 0)
                     });
                     previewGrid.Children.Add(infoStack);
                     previewBorder.Child = previewGrid;
                     panel.Children.Add(previewBorder);
 
-                    await ShowDialogAsync("截图", panel, null, "确定");
+                    string captureTitle = LocalizationService.Instance.GetString("Dialog_Capture_Title");
+                    string okText = LocalizationService.Instance.GetString("Dialog_OK");
+                    await ShowDialogAsync(captureTitle, panel, null, okText);
                 }
             }
         }

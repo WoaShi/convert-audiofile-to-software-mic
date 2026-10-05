@@ -55,7 +55,6 @@ namespace AudioToMicWPF
                 if (!_firstPoint.HasValue)
                 {
                     _firstPoint = clickPoint;
-                    SelectionRect.Visibility = Visibility.Visible;
                     UpdateSelectionRect(clickPoint, clickPoint);
                 }
                 else
@@ -104,11 +103,14 @@ namespace AudioToMicWPF
         private void UpdateSelectionRect(Point start, Point end)
         {
             var (x1, y1, x2, y2) = NormalizePoints(start, end);
+            double w = Math.Max(1, x2 - x1);
+            double h = Math.Max(1, y2 - y1);
 
             Canvas.SetLeft(SelectionRect, x1);
             Canvas.SetTop(SelectionRect, y1);
-            SelectionRect.Width = Math.Max(1, x2 - x1);
-            SelectionRect.Height = Math.Max(1, y2 - y1);
+            SelectionRect.Width = w;
+            SelectionRect.Height = h;
+            SelectionRect.Visibility = Visibility.Visible;
         }
 
         private (double x1, double y1, double x2, double y2) NormalizePoints(Point p1, Point p2)
@@ -125,11 +127,13 @@ namespace AudioToMicWPF
         {
             if (!_firstPoint.HasValue || !_currentPoint.HasValue) return;
 
-            var (_, _, x2, y2) = NormalizePoints(_firstPoint.Value, _currentPoint.Value);
+            var (x1, y1, x2, y2) = NormalizePoints(_firstPoint.Value, _currentPoint.Value);
+            double w = Math.Max(1, x2 - x1);
+            double h = Math.Max(1, y2 - y1);
 
             ButtonPanel.Measure(new System.Windows.Size(double.PositiveInfinity, double.PositiveInfinity));
-            double panelW = ButtonPanel.DesiredSize.Width > 0 ? ButtonPanel.DesiredSize.Width : 220;
-            double panelH = ButtonPanel.DesiredSize.Height > 0 ? ButtonPanel.DesiredSize.Height : 50;
+            double panelW = ButtonPanel.DesiredSize.Width > 0 ? ButtonPanel.DesiredSize.Width : 260;
+            double panelH = ButtonPanel.DesiredSize.Height > 0 ? ButtonPanel.DesiredSize.Height : 44;
 
             double targetX = x2 - panelW;
             if (targetX < 12) targetX = 12;
@@ -139,7 +143,7 @@ namespace AudioToMicWPF
             double targetY = y2 + 10;
             if (targetY + panelH > ActualHeight - 12)
             {
-                targetY = y2 - panelH - 10;
+                targetY = y1 - panelH - 10;
             }
             if (targetY < 12) targetY = 12;
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.Win32;
+using Microsoft.Win32;
 
 namespace AudioToMicWPF.Services
 {
@@ -8,9 +8,9 @@ namespace AudioToMicWPF.Services
         {
             OpenFileDialog openFileDialog = new OpenFileDialog
             {
-                Title = "选择目标音频",
-                Filter = "音频文件 (*.mp3;*.aac;*.flac;*.ogg;*.wav)|*.mp3;*.aac;*.flac;*.ogg;*.wav",
-                Multiselect = false // 设置为 true ：允许多选
+                Title = LocalizationService.Instance.GetString("FilePicker_FilterTitle"),
+                Filter = "音频文件 (*.mp3;*.aac;*.flac;*.ogg;*.wav;*.m4a)|*.mp3;*.aac;*.flac;*.ogg;*.wav;*.m4a;*.wma",
+                Multiselect = false
             };
 
             if (openFileDialog.ShowDialog() == true)
@@ -21,7 +21,7 @@ namespace AudioToMicWPF.Services
             }
             else
             {
-                return "未选择音频文件！";
+                return LocalizationService.Instance.GetString("FilePicker_NoFile");
             }
         }
     }
