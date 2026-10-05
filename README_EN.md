@@ -11,7 +11,7 @@ Convert audio files into microphone input for desktop chat applications (support
 - **Runtime Requirement**: Requires [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0). Please download the installer matching your system architecture (usually **x64** for 64-bit systems).
 - **Driver Requirement**: Depends on a virtual audio driver (such as [VB-CABLE](https://vb-audio.com/Cable/index.htm) or [VoiceMeeter](https://vb-audio.com/Voicemeeter/)). The software automatically detects and binds available virtual audio devices in the system.
 - **Compatibility**: Supports Windows 10 / Windows 11, and any desktop chat application that records voice messages while holding down a button.
-- If the 2026-9-15 release causes confusion, please download the 2025-4-26 release.
+- If the newest release causes confusion, please download the 2025-4-26 release.
 - **Modern Fluent UI**: Built with native .NET 10 WPF Fluent UI, Windows 11 Mica backdrop effect, automatic system dark mode detection, real-time dark/light theme switching, and English / Simplified Chinese localization.
 - **Zero Heavy Native Dependencies**: Uses a custom pure C# template matching algorithm based on Normalized Cross Correlation (NCC) and 2D integral images, avoiding bulky OpenCV binaries.
 
